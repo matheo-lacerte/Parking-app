@@ -7,10 +7,12 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png'],
+      includeAssets: ['favicon.ico'],
       manifest: {
+        id: "/",
         name: "Parking Copro",
         short_name: "Parking",
+        description: "Application de copropriété pour signaler et vérifier les voitures sur les places visiteurs.",
         start_url: ".",
         display: "standalone",
         background_color: "#ffffff",
@@ -29,5 +31,5 @@ export default defineConfig({
         ]
       }
     })
-  ],
+  ]
 })
