@@ -1,4 +1,5 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -17,8 +18,8 @@ export default function Navbar() {
       </div>
 
       <div className="navbar-links">
-        <a href="/" className="navbar-link active">Accueil</a>
-        <a href="/profil" className="navbar-link">Profil</a>
+        <NavLink to="/" end className={({isActive}) => `navbar-link${isActive ? ' active' : ''}`}>Accueil</NavLink>
+        <NavLink to="/profil" className={({isActive}) => `navbar-link${isActive ? ' active' : ''}`}>Profil</NavLink>
       </div>
     </nav>
   );
