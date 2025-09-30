@@ -18,7 +18,7 @@ export default function Navbar() {
 
       <div className="navbar-links">
         <a href="/" className="navbar-link active">Accueil</a>
-        <a href="/profile" className="navbar-link">Profile</a>
+        <a href="/profil" className="navbar-link">Profil</a>
       </div>
     </nav>
   );

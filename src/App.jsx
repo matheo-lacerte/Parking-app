@@ -1,5 +1,6 @@
 import React from "react";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/navbar/Navbar";
+import UpdatePrompt from "./components/updateprompt/UpdatePrompt";
 import './App.css';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
           </div>
         </div>
       </main>
+      <UpdatePrompt />
     </div>
   );
 }
