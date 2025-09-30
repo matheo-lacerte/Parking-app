@@ -1,0 +1,17 @@
+.version-badge {
+  position: fixed;
+  left: 12px;
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  font-size: 12px;
+  line-height: 1;
+  color: #ffffff;
+  background: rgba(44, 62, 80, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 6px 8px;
+  z-index: 900; /* Below mandatory update overlay (z-index 99999) */
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  pointer-events: none; /* Never blocks taps */
+  user-select: none;
+}
