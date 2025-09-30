@@ -10,7 +10,10 @@ export default function Navbar() {
           alt="Logo Parking Copro" 
           className="navbar-logo"
         />
-        <span className="navbar-title">Parking Copro</span>
+        <span className="navbar-title">
+          <span className="navbar-title-line">Parking</span>
+          <span className="navbar-title-line">Copro</span>
+        </span>
       </div>
 
       <div className="navbar-links">
