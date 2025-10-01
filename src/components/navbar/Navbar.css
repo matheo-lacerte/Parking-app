@@ -124,14 +124,14 @@
 @media (max-width: 768px) {
   .navbar {
     padding: 0 16px;
-    height: 56px;
+    height: 64px; /* keep consistent size on Android refresh */
   }
   
-  .navbar-title-line { font-size: 16px; }
+  .navbar-title-line { font-size: 18px; }
   
   .navbar-logo {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
   }
   
   .navbar-links {
@@ -149,7 +149,7 @@
     gap: 8px;
   }
   
-  .navbar-title-line { font-size: 15px; }
+  .navbar-title-line { font-size: 18px; }
   
   .navbar-link {
     padding: 6px 10px;

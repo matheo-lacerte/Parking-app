@@ -14,6 +14,9 @@ html, body, #root {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  /* Prevent Android/iOS from auto-scaling text after orientation/refresh */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 /* Le body sert juste de conteneur flex vertical */
