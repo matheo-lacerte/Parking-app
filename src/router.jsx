@@ -4,7 +4,7 @@ import App from './App.jsx';
 import Home from './pages/Home.jsx';
 import Profile from './pages/Profile.jsx';
 import NotFound from './pages/NotFound.jsx';
-
+import CameraCapture from './components/cameracapture/CameraCapture.jsx';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -13,6 +13,8 @@ export const router = createBrowserRouter([
       { index: true, element: <Home /> },
   { path: 'profil', element: <Profile /> },
       { path: '*', element: <NotFound /> },
+      { path: 'camera', element: <CameraCapture /> }
+
     ],
   },
 ]);

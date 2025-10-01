@@ -5,9 +5,13 @@ export default function Home() {
     console.log("Caméra cliquée !");
   };
 
+  const navigateToCamera = () => {
+    window.location.href = "/camera";
+  };
+
   return (
     <main className="main-content">
-      <div className="camera-container" onClick={handleCameraClick}>
+      <div className="camera-container" onClick={navigateToCamera}>
         <div className="camera-box">
           <div className="camera-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="white" viewBox="0 0 24 24">

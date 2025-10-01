@@ -1,0 +1,85 @@
+.camera-screen {
+  position: relative;
+  width: 100%;
+  height: calc(100dvh - 64px);
+  background: #2c2c2c;
+  overflow: hidden;
+}
+
+@supports not (height: 100dvh) {
+  .camera-screen { height: calc(100vh - 64px); }
+}
+
+.camera-frame {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.35),
+    0 2px 8px rgba(0,0,0,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.camera-video,
+.camera-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #111;
+}
+
+.camera-controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(16px, calc(12px + env(safe-area-inset-bottom, 0px)));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.shutter-button {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  border: 3px solid rgba(255,255,255,0.7);
+  background: radial-gradient(circle at 50% 40%, #ffffff, #dfe6e9 65%);
+  box-shadow:
+    0 12px 30px rgba(0,0,0,0.35),
+    inset 0 1px 2px rgba(0,0,0,0.2),
+    inset 0 -2px 3px rgba(255,255,255,0.4);
+  cursor: pointer;
+  transition: transform 0.06s ease, box-shadow 0.2s ease;
+}
+
+.shutter-button:active { transform: scale(0.96); }
+
+.retry-btn, .confirm-btn {
+  background: rgba(44,62,80,0.85);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #fff;
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+
+.preview-overlay {
+  position: absolute;
+  inset: 12px 12px calc(96px + env(safe-area-inset-bottom, 0px)) 12px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.preview-actions {
+  position: absolute;
+  left: 0; right: 0; bottom: max(16px, calc(12px + env(safe-area-inset-bottom, 0px)));
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
