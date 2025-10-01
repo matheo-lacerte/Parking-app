@@ -1,0 +1,171 @@
+.map-screen {
+  position: relative;
+  width: 100%;
+  height: calc(100dvh - 64px);
+  background: #2c2c2c;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@supports not (height: 100dvh) {
+  .map-screen { height: calc(100vh - 64px); }
+}
+
+
+
+
+
+/* Area that holds the image; leaves room for title and picker */
+.map-canvas {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 56px; /* below the title chip */
+  bottom: calc(110px + env(safe-area-inset-bottom, 0px)); /* above the picker */
+  z-index: 1; /* under overlays */
+}
+
+.map-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* fill the frame like fullscreen background */
+  object-position: center;
+  display: block;
+  background: #111;
+}
+
+/* Optional: force stretch (distort to frame) */
+.map-img--stretch { object-fit: fill; }
+
+.map-overlay { /* zone clickable container */
+  position: absolute;
+  inset: 0;
+}
+
+.map-zone {
+  position: absolute;
+  background: rgba(0, 153, 255, 0.18);
+  border: 1px solid rgba(0, 153, 255, 0.35);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* --- Zone selector UI --- */
+.zone-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 12px;
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  border: 1px solid rgba(255,255,255,0.15);
+  backdrop-filter: blur(6px);
+  z-index: 2;
+}
+
+.zone-picker {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: max(14px, calc(10px + env(safe-area-inset-bottom, 0px)));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+  padding: 8px 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  backdrop-filter: blur(6px);
+  z-index: 2;
+}
+
+.zone-label {
+  min-width: 110px;
+  text-align: center;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  pointer-events: none;
+}
+
+.zone-arrow {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.2s ease;
+}
+
+.zone-arrow:active { transform: scale(0.96); }
+
+/* Ensure SVG stroke is visible */
+.zone-arrow svg path { stroke: #fff !important; }
+
+/* --- 2x2 grid tiles --- */
+.zone-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+  width: min(640px, 92%);
+  height: auto; /* let tiles define height so they can be perfect squares */
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.zone-tile {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px; /* slightly less rounded to look more square */
+  border: 1px solid rgba(255,255,255,0.12);
+  background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+  color: #fff;
+  display: block;
+  aspect-ratio: 1 / 1; /* make each tile square */
+  box-shadow: 0 12px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.zone-tile:hover { transform: translateY(-2px); }
+.zone-tile:active { transform: translateY(0); }
+
+.zone-tile.selected {
+  border-color: rgba(97,218,251,0.7);
+  box-shadow: 0 18px 40px rgba(97,218,251,0.25), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.zone-tile-img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill; /* fill without crop (may distort) */
+  display: block;
+}
+
+.zone-tile-label {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  font-weight: 700;
+  font-size: clamp(14px, 3.2vw, 18px);
+  letter-spacing: 0.4px;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px;
+  padding: 6px 10px;
+  backdrop-filter: blur(4px);
+}

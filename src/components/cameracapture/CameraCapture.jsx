@@ -52,14 +52,23 @@ export default function CameraCapture() {
         const canvas = canvasRef.current;
         const video = videoRef.current;
         if (!canvas || !video) return;
-        // Adapter le canvas à la taille réelle du flux
+        // Adapter le canvas à la taille réelle du flux, avec réduction si besoin
         const w = video.videoWidth || 320;
         const h = video.videoHeight || 240;
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(video, 0, 0, w, h);
-        const photoData = canvas.toDataURL("image/png");
+        const MAX_DIM = 1280; // limite pour réduire la taille du base64
+        let targetW = w;
+        let targetH = h;
+        if (w > MAX_DIM || h > MAX_DIM) {
+            const scale = Math.min(MAX_DIM / w, MAX_DIM / h);
+            targetW = Math.round(w * scale);
+            targetH = Math.round(h * scale);
+        }
+        canvas.width = targetW;
+        canvas.height = targetH;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, targetW, targetH);
+    // JPEG réduit la taille en localStorage; qualité 0.85
+    const photoData = canvas.toDataURL("image/jpeg", 0.85);
         setPhoto(photoData);
 
         // arrêter la caméra après capture
@@ -69,7 +78,14 @@ export default function CameraCapture() {
 
     // Confirmer et passer à la page suivante
     const confirmPhoto = () => {
-        navigate("/confirm-photo", { state: { photo } });
+        if (!photo) {
+            alert("Aucune photo capturée.");
+            return;
+        }
+        try {
+            sessionStorage.setItem("pc:lastPhoto", photo);
+        } catch {}
+        navigate("/parking", { state: { photo } });
     };
 
     // Démarrer automatiquement quand on arrive sur la page

@@ -1,0 +1,71 @@
+.home-screen {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  display: grid;
+  gap: 16px;
+}
+
+.camera-container {
+  display: grid;
+  place-items: center;
+  gap: 12px;
+}
+
+.camera-box {
+  width: 160px;
+  height: 160px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.22), rgba(0,0,0,0.3));
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+  display: grid;
+  place-items: center;
+  transition: transform .12s ease-out, box-shadow .12s ease-out;
+}
+
+.camera-box:active {
+  transform: translateY(1px);
+}
+
+.camera-text {
+  color: #e6e6e6;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.25;
+  opacity: 0.9;
+}
+
+.home-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.home-history-btn {
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  text-decoration: none;
+  color: #fff;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.home-history-btn:active {
+  transform: translateY(1px);
+}
+
+.home-history-icon {
+  width: 18px;
+  height: 18px;
+  opacity: 0.95;
+}

@@ -1,0 +1,97 @@
+/* Mobile-first layout for History page */
+.history-screen {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: calc(12px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+}
+
+.history-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.history-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.history-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.history-item {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 12px;
+  align-items: center;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.history-thumb {
+  width: 88px;
+  height: 88px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: rgba(255,255,255,0.08);
+}
+
+.history-thumb--empty {
+  display: grid;
+  place-items: center;
+  color: #bdbdbd;
+  font-size: 12px;
+}
+
+.history-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.history-zone {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.history-date {
+  margin-top: 2px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.history-empty {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: #d6d6d6;
+  gap: 10px;
+  padding: 32px 0;
+}
+
+.history-empty-icon {
+  width: 64px;
+  height: 64px;
+  opacity: 0.8;
+}
+
+.history-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Larger screens: tighten density */
+@media (min-width: 480px) {
+  .history-item { grid-template-columns: 96px 1fr; padding: 14px; }
+  .history-thumb { width: 96px; height: 96px; }
+}
