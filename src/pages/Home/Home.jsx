@@ -28,6 +28,14 @@ export default function Home() {
             Cliquez pour ajouter et vérifier une voiture
           </div>
         </div>
+        <div className="home-actions">
+          <div className="home-history-small">
+            Signalement récents
+            <li>
+
+            </li>
+          </div>
+        </div>
 
         <div className="home-actions">
           <Link to="/history" className="home-history-btn">
@@ -35,7 +43,7 @@ export default function Home() {
               <path d="M12 5v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M21 12a9 9 0 1 1-9-9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            Historique
+            Afficher plus
           </Link>
         </div>
       </div>

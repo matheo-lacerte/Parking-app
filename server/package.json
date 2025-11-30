@@ -1,0 +1,25 @@
+{
+  "name": "parking-app-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Base Node/Express server for Parking-app",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.86.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "supabase": "^2.63.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
