@@ -11,6 +11,7 @@ import History from './pages/History/History.jsx';
 import ProtectedRoute from './components/auth/ProtectedRoute.jsx';
 import Login from './pages/Auth/Login/login.jsx';
 import Signup from './pages/Auth/Signup/signup.jsx';
+import HouseHolds from './pages/HouseHolds/households.jsx';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -24,6 +25,7 @@ export const router = createBrowserRouter([
       { path: 'history', element: <ProtectedRoute><History /></ProtectedRoute> },
       { path: 'login', element: <Login /> },
       { path: 'signup', element: <Signup /> },
+      { path: 'households', element: <ProtectedRoute><HouseHolds /></ProtectedRoute> },
       { path: '*', element: <NotFound /> },
 
     ],

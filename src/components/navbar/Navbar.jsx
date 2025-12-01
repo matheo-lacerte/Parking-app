@@ -14,11 +14,13 @@ export default function Navbar() {
         <span className="navbar-title">
           <span className="navbar-title-line">Parking</span>
           <span className="navbar-title-line">Copro</span>
+          <span className="navbar-title-line">Occupant</span>
         </span>
       </div>
       <div className="navbar-links">
         <NavLink to="/" end className={({ isActive }) => `navbar-link${isActive ? ' active' : ''}`}>Accueil</NavLink>
         <NavLink to="/profil" className={({ isActive }) => `navbar-link${isActive ? ' active' : ''}`}>Profil</NavLink>
+        <NavLink to="/households" className={({ isActive }) => `navbar-link${isActive ? ' active' : ''}`}>Occupant</NavLink>
       </div>
     </nav>
   );
