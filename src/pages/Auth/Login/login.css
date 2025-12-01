@@ -1,0 +1,161 @@
+/* Login page styles aligned with Signup, using light theme tokens defined in index.css */
+/* Local variables mirroring Signup defaults */
+:root {
+  --login-panel-bg: #ffffff;
+  --login-accent: #2563eb;
+  --login-accent-hover: #1d4ed8;
+  --login-danger: #dc2626;
+  --login-radius: 14px;
+  --login-border-color: #d9e0e7;
+  --login-text: #1a1f29;
+  --login-muted: #5f6b7a;
+  --login-shadow: 0 6px 20px -4px rgba(0,0,0,0.08), 0 2px 6px -1px rgba(0,0,0,0.06);
+}
+
+.auth-container {
+  min-height: calc(100dvh - 80px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(1.5rem, 4vw, 3rem) 1rem 3rem;
+  background: linear-gradient(135deg, #ffffff, #eef2f6);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 520px;
+  background: linear-gradient(135deg, var(--login-panel-bg), #fdfefe 70%);
+  border: 1px solid var(--login-border-color);
+  border-radius: var(--login-radius);
+  padding: clamp(1.6rem, 3vw, 2.4rem) clamp(1.6rem, 3vw, 2.2rem) 2.2rem;
+  position: relative;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08), var(--login-shadow);
+  isolation: isolate;
+}
+
+.auth-card:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(59,130,246,0.4), rgba(96,165,250,0.05));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.auth-title {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.55rem, 3.5vw, 2rem);
+  font-weight: 600;
+  letter-spacing: .5px;
+  color: var(--login-text);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.auth-label {
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: .35rem;
+  color: var(--login-muted);
+}
+
+.auth-input {
+  appearance: none;
+  width: 100%;
+  padding: .75rem .85rem;
+  background: #ffffff;
+  border: 1px solid var(--login-border-color);
+  border-radius: 10px;
+  font-size: .95rem;
+  color: var(--login-text);
+  line-height: 1.2;
+  transition: border-color .18s, background .18s, box-shadow .18s;
+}
+.auth-input::placeholder { color: #546170; }
+.auth-input:focus {
+  outline: none;
+  border-color: var(--login-accent);
+  background: #f0f4f9;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.25);
+}
+
+.auth-error {
+  color: var(--login-danger);
+  background: rgba(220,38,38,0.12);
+  border: 1px solid rgba(220,38,38,0.4);
+  padding: .6rem .75rem;
+  border-radius: 8px;
+  font-size: .9rem;
+}
+
+.auth-button {
+  width: 100%;
+  padding: .95rem 1.2rem;
+  font-size: .9rem;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--login-radius);
+  background: #3b82f6; /* match signup primary */
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  box-shadow: 0 6px 18px -6px rgba(37,99,235,0.5);
+  transition: background var(--transition-fast, .15s), transform var(--transition-fast, .15s), box-shadow var(--transition-fast, .15s);
+}
+.auth-button:hover:not([disabled]) {
+  background: linear-gradient(135deg, var(--login-accent-hover) 0%, var(--login-accent) 100%); /* match signup hover */
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px -8px rgba(37,99,235,0.55);
+}
+.auth-button:active:not([disabled]) {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px -4px rgba(59,130,246,0.55);
+}
+.auth-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auth-secondary {
+  width: 100%;
+  margin-top: .9rem;
+  padding: .4rem .5rem;
+  background: none;
+  border: none;
+  color: var(--login-accent); /* match signup accent */
+  font-size: .85rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background .18s, color .18s;
+}
+.auth-secondary:hover {
+  background: rgba(37,99,235,0.12);
+  color: var(--login-accent-hover);
+}
+
+/* Small fade-in like Signup */
+.auth-card { animation: loginFade .45s ease; }
+@keyframes loginFade {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}

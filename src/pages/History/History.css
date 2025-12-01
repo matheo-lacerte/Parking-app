@@ -30,11 +30,11 @@
   grid-template-columns: 88px 1fr;
   gap: 12px;
   align-items: center;
-  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
-  border: 1px solid rgba(255,255,255,0.12);
+  background: #ffffff;
+  border: 1px solid #d9e0e7;
   border-radius: 16px;
   padding: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
 .history-thumb {
@@ -42,7 +42,8 @@
   height: 88px;
   border-radius: 12px;
   object-fit: cover;
-  background: rgba(255,255,255,0.08);
+  background: #eef2f6;
+  border: 1px solid #d9e0e7;
 }
 
 .history-thumb--empty {
@@ -73,7 +74,7 @@
   display: grid;
   place-items: center;
   text-align: center;
-  color: #d6d6d6;
+  color: #5f6b7a;
   gap: 10px;
   padding: 32px 0;
 }

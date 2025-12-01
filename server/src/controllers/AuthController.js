@@ -108,3 +108,27 @@ export const login = async (req, res) => {
         expires_at: session.expires_at
     })
 }
+
+export const logout = async (req, res) => {
+    // With bearer tokens, server-side signOut is not needed and may fail in service context.
+    // Frontend should drop the token; we just acknowledge the request.
+    return res.status(200).json({ message: "Déconnexion réussie." })
+}
+
+export const getProfile = async (req, res) => {
+    const { authorization } = req.headers
+    const token = authorization?.split(" ")[1]
+    if (!token) return res.status(400).json({ error: "Token manquant." })
+    const { data, error } = await supabase.auth.getUser(token)
+    if (error) return res.status(401).json({ error: "Token invalide." })
+    const user = data.user
+    if (!user) return res.status(404).json({ error: "Utilisateur non trouvé." })
+
+    const { data: profile, error: profileError } = await supabase   
+        .from("users")
+        .select("*")
+        .eq("id", user.id)
+        .single()
+    if (profileError) return res.status(500).json({ error: "Erreur récupération profil." })
+    return res.status(200).json({ user: profile })
+}   

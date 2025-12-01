@@ -2,7 +2,7 @@
   position: relative;
   width: 100%;
   height: calc(100dvh - 64px);
-  background: #2c2c2c;
+  background: #f5f7fa;
   overflow: hidden;
 }
 
@@ -18,11 +18,9 @@
   bottom: calc(96px + env(safe-area-inset-bottom, 0px));
   border-radius: 20px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow:
-    0 20px 60px rgba(0,0,0,0.35),
-    0 2px 8px rgba(0,0,0,0.25),
-    inset 0 1px 0 rgba(255,255,255,0.06);
+  border: 1px solid #d9e0e7;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.7);
+  background: #ffffff;
 }
 
 .camera-video,
@@ -31,7 +29,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  background: #111;
+  background: #e1e6eb;
 }
 
 .camera-controls {
@@ -62,11 +60,12 @@
 .shutter-button:active { transform: scale(0.96); }
 
 .retry-btn, .confirm-btn {
-  background: rgba(44,62,80,0.85);
-  border: 1px solid rgba(255,255,255,0.12);
-  color: #fff;
+  background: #ffffff;
+  border: 1px solid #d9e0e7;
+  color: #1a1f29;
   border-radius: 12px;
   padding: 10px 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .preview-overlay {

@@ -5,16 +5,48 @@
   box-sizing: border-box;
 }
 
+/* Light theme variables */
+:root {
+  --color-bg: #f5f7fa;
+  --color-bg-alt: #eef2f6;
+  --color-panel: #ffffff;
+  --color-panel-alt: #f9fbfd;
+  --color-text: #0e141b; /* stronger for outdoor */
+  --color-text-soft: #1f2730;
+  --color-muted: #4e5a66; /* slightly darker for contrast */
+  --color-border: #b6c2cc; /* stronger border always visible */
+  --color-border-strong: #5a6b7c; /* high contrast edge */
+  --color-accent: #0047ff; /* saturated blue for sunlight */
+  --color-accent-hover: #0039cc;
+  --color-accent-soft: #dbe9ff;
+  --color-success: #0d9340;
+  --color-warning: #c25e04;
+  --color-danger: #c81e1e;
+  --focus-ring: rgba(0,71,255,0.55);
+  --elevation-1: 0 1px 2px rgba(0,0,0,0.08);
+  --elevation-2: 0 2px 8px rgba(0,0,0,0.10);
+  --elevation-3: 0 4px 18px rgba(0,0,0,0.14);
+  --elevation-inset: inset 0 1px 0 rgba(255,255,255,0.7);
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 1000px;
+  --transition-fast: 120ms cubic-bezier(.4,0,.2,1);
+  --transition-md: 240ms cubic-bezier(.4,0,.2,1);
+  /* slight global contrast bump for sunlight readability */
+  filter: contrast(1.02) saturate(1.05);
+}
+
 html, body, #root {
   width: 100%;
   height: 100%;
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  background-color: #242424;
-  color: rgba(255, 255, 255, 0.9);
+  background-color: var(--color-bg);
+  color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  /* Prevent Android/iOS from auto-scaling text after orientation/refresh */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
@@ -27,13 +59,11 @@ body {
 
 /* Liens */
 a {
-  color: #61dafb;
+  color: var(--color-accent);
   text-decoration: none;
   transition: color 0.2s;
 }
-a:hover {
-  color: #46b0d9;
-}
+a:hover { color: var(--color-accent-hover); }
 
 /* Titres */
 h1, h2, h3 {
@@ -42,15 +72,62 @@ h1, h2, h3 {
 
 /* Boutons génériques */
 button {
-  background-color: #2c3e50;
-  color: white;
-  border: none;
+  background: linear-gradient(180deg,var(--color-panel),var(--color-panel-alt));
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
   padding: 10px 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.2s;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: .3px;
+  transition: background var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  box-shadow: var(--elevation-1);
 }
 button:hover {
-  background-color: #34495e;
+  background: var(--color-panel);
+  box-shadow: var(--elevation-2);
+  border-color: var(--color-border-strong);
+}
+
+/* Utility buttons */
+.btn-primary {
+  background: linear-gradient(135deg,var(--color-accent),#3b82f6);
+  color: #fff;
+  border: 1px solid var(--color-accent);
+  box-shadow: 0 4px 14px -4px rgba(37,99,235,0.4);
+}
+.btn-primary:hover { box-shadow: 0 6px 18px -4px rgba(37,99,235,0.45); }
+.btn-outline {
+  background: var(--color-panel);
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+}
+.btn-outline:hover { background: var(--color-accent-soft); }
+
+/* Card utility */
+.card {
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-1), var(--elevation-inset);
+  padding: 1.25rem 1.4rem;
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+.card:hover { box-shadow: var(--elevation-2); }
+.card:active { transform: translateY(1px); }
+
+/* Soft badge */
+.badge-soft {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: .5px;
+  color: var(--color-text-soft);
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
 }

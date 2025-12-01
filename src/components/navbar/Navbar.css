@@ -1,7 +1,7 @@
 /* Navbar moderne et élégante */
 .navbar {
-  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-  color: white;
+  background: linear-gradient(135deg,#ffffff 0%, #f1f5f9 100%);
+  color: #1a1f29;
   padding: 0 24px;
   height: 64px;
   min-height: 64px; /* lock height across routes */
@@ -9,11 +9,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 
-    0 2px 20px rgba(0, 0, 0, 0.1),
-    0 1px 4px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-bottom: 1px solid #d9e0e7;
   position: relative;
   z-index: 1000;
   box-sizing: border-box;
@@ -58,10 +55,7 @@
   font-weight: 700;
   font-size: 18px;
   letter-spacing: 0.5px;
-  background: linear-gradient(135deg, #ffffff, #ecf0f1);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #1a1f29;
 }
 
 /* Navigation links */
@@ -72,7 +66,7 @@
 }
 
 .navbar-link {
-  color: rgba(255, 255, 255, 0.9);
+  color: #3b4652;
   text-decoration: none;
   padding: 10px 16px;
   border-radius: 12px;
@@ -100,12 +94,11 @@
 }
 
 .navbar-link:hover {
-  color: white;
+  color: #1a1f29;
   transform: translateY(-1px);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.2),
-    0 2px 4px rgba(0, 0, 0, 0.1);
+  border-color: #d9e0e7;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  background: #ffffff;
 }
 
 .navbar-link:hover::before {
@@ -119,12 +112,10 @@
 
 /* État actif pour le lien */
 .navbar-link.active {
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-  border-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.15),
-    inset 0 1px 2px rgba(255, 255, 255, 0.1);
+  background: #e6eef5;
+  color: #1a1f29;
+  border-color: #cbd5df;
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.7), 0 2px 6px rgba(0,0,0,0.05);
 }
 
 /* Responsive design */

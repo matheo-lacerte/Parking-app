@@ -1,0 +1,42 @@
+/* Global theme tokens + high visibility overrides */
+:root {
+  /* Already defined in index.css; duplicated here for centralization if imported earlier */
+  --hc-accent: #0047ff; /* slightly more saturated for outdoor */
+  --hc-accent-hover: #0039cc;
+  --hc-border-strong: #5a6b7c;
+  --hc-panel: #ffffff;
+  --hc-text: #0e141b;
+  --hc-focus-ring: rgba(0,71,255,0.55);
+}
+
+/* High visibility mode triggered by data attribute */
+html[data-visibility="high"] {
+  --color-accent: var(--hc-accent);
+  --color-accent-hover: var(--hc-accent-hover);
+  --color-border: var(--hc-border-strong);
+  --color-border-strong: var(--hc-border-strong);
+  --color-panel: var(--hc-panel);
+  --color-text: var(--hc-text);
+  --focus-ring: var(--hc-focus-ring);
+  filter: contrast(1.05) saturate(1.06);
+}
+
+/* High contrast button variant */
+.btn-hc {
+  background: linear-gradient(135deg,var(--color-accent) 0%, var(--color-accent-hover) 88%);
+  color: #fff;
+  border: 2px solid var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.4), 0 6px 18px -4px rgba(0,71,255,0.5);
+  font-weight: 700;
+  letter-spacing: .4px;
+}
+.btn-hc:hover { box-shadow: 0 0 0 2px rgba(255,255,255,0.5), 0 8px 26px -6px rgba(0,71,255,0.55); }
+.btn-hc:active { transform: translateY(0); box-shadow: 0 0 0 2px rgba(255,255,255,0.45), 0 4px 16px -6px rgba(0,71,255,0.5); }
+.btn-hc:focus-visible { outline: 0; box-shadow: 0 0 0 4px var(--focus-ring), 0 0 0 2px rgba(255,255,255,0.6); }
+
+/* Utility to force strong text */
+.text-strong { color: var(--color-text); font-weight: 700; letter-spacing: .25px; }
+.text-muted-hi { color: var(--color-muted); font-weight: 500; }
+
+/* Outline helper for any focusable element */
+.outline-focus:focus-visible { outline: 0; box-shadow: 0 0 0 4px var(--focus-ring); }

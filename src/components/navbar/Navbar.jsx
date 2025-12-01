@@ -6,9 +6,9 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <img 
-          src="/IconParking-192.png" 
-          alt="Logo Parking Copro" 
+        <img
+          src="/IconParking-192.png"
+          alt="Logo Parking Copro"
           className="navbar-logo"
         />
         <span className="navbar-title">
@@ -16,10 +16,9 @@ export default function Navbar() {
           <span className="navbar-title-line">Copro</span>
         </span>
       </div>
-
       <div className="navbar-links">
-        <NavLink to="/" end className={({isActive}) => `navbar-link${isActive ? ' active' : ''}`}>Accueil</NavLink>
-        <NavLink to="/profil" className={({isActive}) => `navbar-link${isActive ? ' active' : ''}`}>Profil</NavLink>
+        <NavLink to="/" end className={({ isActive }) => `navbar-link${isActive ? ' active' : ''}`}>Accueil</NavLink>
+        <NavLink to="/profil" className={({ isActive }) => `navbar-link${isActive ? ' active' : ''}`}>Profil</NavLink>
       </div>
     </nav>
   );
