@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.jsx';
 import './login.css';
 import { useLoading } from '../../../context/LoadingContext.jsx';
+import { apiFetch } from '../../../lib/api.js';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ const Login = () => {
     setLoading(true);
     wrapPromise(async () => {
       try {
-        const res = await fetch('http://localhost:4000/auth/login', {
+        const res = await apiFetch('/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './signup.css';
 import { useLoading } from '../../../context/LoadingContext.jsx';
+import { apiFetch } from '../../../lib/api.js';
 
 const Signup = () => {
 	const navigate = useNavigate();
@@ -27,7 +28,7 @@ const Signup = () => {
 		setLoading(true);
 		wrapPromise(async () => {
 			try {
-				const res = await fetch('http://localhost:4000/auth/signup', {
+				const res = await apiFetch('/auth/signup', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(form)

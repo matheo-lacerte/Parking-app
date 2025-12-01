@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import './Profile.css';
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useLoading } from "../../context/LoadingContext.jsx";
+import { apiFetch } from "../../lib/api.js";
 
 export default function Profile() {
   const { token } = useAuth();
@@ -11,7 +12,7 @@ export default function Profile() {
   const handleLogout = React.useCallback(async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const res = await fetch('http://localhost:4000/auth/logout', {
+      const res = await apiFetch('/auth/logout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -45,7 +46,7 @@ export default function Profile() {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch('http://localhost:4000/auth/getProfile', {
+        const res = await apiFetch('/auth/getProfile', {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,

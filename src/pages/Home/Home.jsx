@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import "./Home.css";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useLoading } from "../../context/LoadingContext.jsx";
+import { apiFetch } from "../../lib/api.js";
 
 export default function Home() {
   const { token } = useAuth();
@@ -25,7 +26,7 @@ export default function Home() {
       try {
         setLoadingObs(true);
         setErrorObs(null);
-        const res = await fetch("http://localhost:4000/observations/byDate", {
+        const res = await apiFetch("/observations/byDate", {
           headers: {
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
