@@ -68,7 +68,7 @@ export default function Profile() {
       
       <div className="profile-card">
         <div className="profile-avatar-wrapper">
-          <img className="profile-avatar" src="/avatar.png" alt="Avatar" />
+          <img className="profile-avatar" src="https://t4.ftcdn.net/jpg/01/24/65/69/360_F_124656969_x3y8YVzvrqFZyv3YLWNo6PJaC88SYxqM.jpg" alt="Avatar" />
         </div>
         <h1 className="profile-name">{profile ? `${profile.name || ''} ${profile.last_name || ''}`.trim() : '...'}</h1>
         <div className="profile-meta">
