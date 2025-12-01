@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Home.css";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useLoading } from "../../context/LoadingContext.jsx";
 
 export default function Home() {
   const { token } = useAuth();
@@ -16,8 +17,11 @@ export default function Home() {
     window.location.href = "/camera";
   };
 
+  const { wrapPromise } = useLoading();
+
   useEffect(() => {
-    const fetchObs = async () => {
+    // Avoid effect loop: do not include wrapPromise in deps
+    wrapPromise(async () => {
       try {
         setLoadingObs(true);
         setErrorObs(null);
@@ -38,8 +42,8 @@ export default function Home() {
       } finally {
         setLoadingObs(false);
       }
-    };
-    fetchObs();
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   return (

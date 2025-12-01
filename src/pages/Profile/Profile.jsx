@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import './Profile.css';
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useLoading } from "../../context/LoadingContext.jsx";
 
 export default function Profile() {
   const { token } = useAuth();
@@ -36,9 +37,11 @@ export default function Profile() {
     }
   }, []);
 
+  const { wrapPromise } = useLoading();
+
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!token) return;
+    if (!token) return;
+    wrapPromise(async () => {
       try {
         setLoading(true);
         setError(null);
@@ -59,8 +62,8 @@ export default function Profile() {
       } finally {
         setLoading(false);
       }
-    };
-    fetchProfile();
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   return (

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.jsx';
 import './login.css';
+import { useLoading } from '../../../context/LoadingContext.jsx';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -15,32 +16,35 @@ const Login = () => {
 
   const from = location.state?.from || '/';
 
+  const { wrapPromise } = useLoading();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    try {
-      const res = await fetch('http://localhost:4000/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Erreur de connexion');
+    wrapPromise(async () => {
+      try {
+        const res = await fetch('http://localhost:4000/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Erreur de connexion');
+        }
+        if (data.access_token) {
+          login(data.access_token);
+          navigate(from, { replace: true });
+        } else {
+          throw new Error('Token manquant dans la réponse');
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-      // Expect access_token from backend
-      if (data.access_token) {
-        login(data.access_token);
-        navigate(from, { replace: true });
-      } else {
-        throw new Error('Token manquant dans la réponse');
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   return (

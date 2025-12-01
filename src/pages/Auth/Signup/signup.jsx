@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './signup.css';
+import { useLoading } from '../../../context/LoadingContext.jsx';
 
 const Signup = () => {
 	const navigate = useNavigate();
@@ -17,26 +18,30 @@ const Signup = () => {
 
 	const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
+	const { wrapPromise } = useLoading();
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setError(null);
 		setMessage(null);
 		setLoading(true);
-		try {
-			const res = await fetch('http://localhost:4000/auth/signup', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(form)
-			});
-			const data = await res.json();
-			if (!res.ok) throw new Error(data.error || 'Erreur inscription');
-			setMessage(data.message || 'Inscription réussie');
-			setTimeout(() => navigate('/login'), 1200);
-		} catch (err) {
-			setError(err.message);
-		} finally {
-			setLoading(false);
-		}
+		wrapPromise(async () => {
+			try {
+				const res = await fetch('http://localhost:4000/auth/signup', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(form)
+				});
+				const data = await res.json();
+				if (!res.ok) throw new Error(data.error || 'Erreur inscription');
+				setMessage(data.message || 'Inscription réussie');
+				setTimeout(() => navigate('/login'), 1200);
+			} catch (err) {
+				setError(err.message);
+			} finally {
+				setLoading(false);
+			}
+		});
 	};
 
 	return (

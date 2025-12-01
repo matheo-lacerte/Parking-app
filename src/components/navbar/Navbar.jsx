@@ -14,7 +14,6 @@ export default function Navbar() {
         <span className="navbar-title">
           <span className="navbar-title-line">Parking</span>
           <span className="navbar-title-line">Copro</span>
-          <span className="navbar-title-line">Occupant</span>
         </span>
       </div>
       <div className="navbar-links">
