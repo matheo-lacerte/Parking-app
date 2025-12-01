@@ -3,6 +3,7 @@ import cors from 'cors';
 
 import healthRouter from './routes/health.js';
 import Auth from './routes/auth.js';
+import observationsRouter from './routes/observations.js';
 const app = express();
 
 // CORS (allow dev frontend by default)
@@ -28,6 +29,9 @@ app.use(express.json());
 // Routes
 app.use('/health', healthRouter);
 app.use('/auth', Auth);
+
+app.use('/observations', observationsRouter);
+
 // Fallback root
 app.get('/', (req, res) => {
   res.json({ name: 'parking-app-server', version: '0.1.0' });

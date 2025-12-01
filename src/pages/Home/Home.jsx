@@ -1,8 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Home.css";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 export default function Home() {
+  const { token } = useAuth();
+  const [observations, setObservations] = useState([]);
+  const [loadingObs, setLoadingObs] = useState(false);
+  const [errorObs, setErrorObs] = useState(null);
   const handleCameraClick = () => {
     console.log("Caméra cliquée !");
   };
@@ -10,6 +15,32 @@ export default function Home() {
   const navigateToCamera = () => {
     window.location.href = "/camera";
   };
+
+  useEffect(() => {
+    const fetchObs = async () => {
+      try {
+        setLoadingObs(true);
+        setErrorObs(null);
+        const res = await fetch("http://localhost:4000/observations/byDate", {
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || "Erreur de récupération des observations");
+        }
+        const list = await res.json();
+        setObservations(Array.isArray(list) ? list.slice(0, 5) : []);
+      } catch (e) {
+        setErrorObs(e.message);
+      } finally {
+        setLoadingObs(false);
+      }
+    };
+    fetchObs();
+  }, [token]);
 
   return (
     <main className="main-content">
@@ -28,23 +59,36 @@ export default function Home() {
             Cliquez pour ajouter et vérifier une voiture
           </div>
         </div>
-        <div className="home-actions">
-          <div className="home-history-small">
-            Signalement récents
-            <li>
+        <div>
+          <section className="home-observations">
+            <div className="home-obs-header">
+              <h3 className="home-obs-title">Dernières observations</h3>
+              <Link to="/history" className="home-obs-viewall">Tout voir</Link>
+            </div>
 
-            </li>
-          </div>
-        </div>
+            {loadingObs && <div className="home-obs-status">Chargement…</div>}
+            {errorObs && <div className="home-obs-error">{errorObs}</div>}
 
-        <div className="home-actions">
-          <Link to="/history" className="home-history-btn">
-            <svg className="home-history-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 5v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M21 12a9 9 0 1 1-9-9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Afficher plus
-          </Link>
+            {!loadingObs && !errorObs && (
+              <ul className="home-obs-list">
+                {observations.length === 0 && (
+                  <li className="home-obs-empty">Aucune observation pour le moment.</li>
+                )}
+                {observations.map((obs) => (
+                  <li key={obs.id} className="home-obs-item">
+                    <div className="home-obs-main">
+                      <span className="home-obs-plate">{obs.license_plate || "Plaque inconnue"}</span>
+                      <span className="home-obs-zone">{obs.zone || "Zone inconnue"}</span>
+                    </div>
+                    <div className="home-obs-meta">
+                      <span className="home-obs-time">{new Date(obs.created_at).toLocaleString()}</span>
+                      {obs.status && <span className={`home-obs-statuspill status-${obs.status}`}>{obs.status}</span>}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         </div>
       </div>
     </main>
