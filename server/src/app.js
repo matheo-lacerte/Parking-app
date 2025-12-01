@@ -6,22 +6,19 @@ import Auth from './routes/auth.js';
 import observationsRouter from './routes/observations.js';
 const app = express();
 
-// CORS (allow dev frontend by default)
-// If using credentials (cookies) you must NOT use '*'. Use a specific origin.
-app.use(cors({
-  origin: process.env.ORIGIN || '*',
-  credentials: true,
+// CORS configuration: accept any origin for simplicity (local + vercel)
+// For bearer tokens only, we don't need credentials: keep it false to avoid strict CORS
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests without origin (like curl, server-side) and any browser origin
+    callback(null, true);
+  },
+  credentials: false,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-
-// Handle preflight explicitly (some proxies require this)
-app.options('*', cors({
-  origin: process.env.ORIGIN || '*',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+};
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Common middleware
 app.use(express.json());
