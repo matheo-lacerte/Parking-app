@@ -1,15 +1,11 @@
-import { VitePWA } from 'vite-plugin-pwa'
-import pkg from './package.json' with { type: 'json' };
-
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
-import pkg from './package.json' with { type: 'json' };
 
 
 export default defineConfig({
   define: {
-    'import.meta.env.VITE_APP_VERSION': JSON.stringify(pkg.version),
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(process.env.npm_package_version || '0.0.0'),
   },
   plugins: [
     react(),
@@ -39,7 +35,7 @@ export default defineConfig({
         ]
       }
     })
-  ]
+  ],
   server: {
     port: 5173,
     proxy: {
