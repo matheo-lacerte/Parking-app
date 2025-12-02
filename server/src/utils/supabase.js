@@ -1,7 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 import dotenv from 'dotenv'
 
+// Load env from default .env and also try .env.local for vercel dev
 dotenv.config()
+dotenv.config({ path: '.env.local' })
 
 const url = process.env.SUPABASE_URL
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
