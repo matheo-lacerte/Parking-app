@@ -1,4 +1,4 @@
-import { supabase } from '../../server/src/utils/supabase.js';
+import { supabaseAdmin, supabasePublic } from '../../server/src/utils/supabase.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -15,7 +15,8 @@ export default async function handler(req, res) {
   const hasAnon = !!process.env.SUPABASE_ANON_KEY;
   try {
     const t0 = Date.now();
-    const { error } = await supabase.from('users').select('id').limit(1);
+    const client = supabaseAdmin || supabasePublic;
+    const { error } = await client.from('users').select('id').limit(1);
     supabase_latency_ms = Date.now() - t0;
     if (error) {
       supabase_status = 'error';

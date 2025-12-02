@@ -1,4 +1,4 @@
-import { supabase } from "../utils/supabase.js"
+import { supabasePublic, supabaseAdmin } from "../utils/supabase.js"
 
 export const signup = async (req, res) => {
     const { name, last_name, email, password, address } = req.body
@@ -7,7 +7,8 @@ export const signup = async (req, res) => {
         return res.status(400).json({ error: "Champs manquants." })
 
     // 1. Signup auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    if (!supabasePublic) return res.status(500).json({ error: "Configuration Supabase ANON manquante." })
+    const { data: authData, error: authError } = await supabasePublic.auth.signUp({
         email,
         password,
         options: { data: { name, last_name } }
@@ -22,7 +23,8 @@ export const signup = async (req, res) => {
     let household_id = null
     let account_status = "pending"
 
-    const { error: userInsertError } = await supabase
+    const client = supabaseAdmin || supabasePublic
+    const { error: userInsertError } = await client
         .from("users")
         .insert({
             id: user.id,
@@ -36,7 +38,7 @@ export const signup = async (req, res) => {
     if (userInsertError) return res.status(500).json({ error: "Erreur DB lors du user insert." })
 
     // 3. Vérifier si household existe déjà
-    const { data: existingHousehold } = await supabase
+    const { data: existingHousehold } = await client
         .from("households")
         .select("*")
         .eq("address", address)
@@ -44,7 +46,7 @@ export const signup = async (req, res) => {
 
     // 4. Si aucun foyer → en créer un (MAINTENANT tu peux mettre primary_user)
     if (!existingHousehold) {
-        const { data: newHousehold, error: houseError } = await supabase
+        const { data: newHousehold, error: houseError } = await client
             .from("households")
             .insert({
                 address,
@@ -59,7 +61,7 @@ export const signup = async (req, res) => {
         account_status = "active"
 
         // update user maintenant que household existe
-        await supabase
+        await client
             .from("users")
             .update({ household_id, account_status })
             .eq("id", user.id)
@@ -84,7 +86,8 @@ export const login = async (req, res) => {
     if (!email || !password)
         return res.status(400).json({ error: "email et mot de passe requis." })
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (!supabasePublic) return res.status(500).json({ error: "Configuration Supabase ANON manquante." })
+    const { data, error } = await supabasePublic.auth.signInWithPassword({ email, password })
 
     if (error) return res.status(401).json({ error: "Identifiants incorrects." })
 
@@ -94,7 +97,8 @@ export const login = async (req, res) => {
         return res.status(401).json({ error: "Email non confirmé." })
 
 
-    const { data: profile } = await supabase
+    const client = supabaseAdmin || supabasePublic
+    const { data: profile } = await client
         .from("users")
         .select("*")
         .eq("id", user.id)

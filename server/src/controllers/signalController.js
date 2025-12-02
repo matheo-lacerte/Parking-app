@@ -1,8 +1,9 @@
-import { supabase } from "../utils/supabase.js"
+import { supabaseAdmin, supabasePublic } from "../utils/supabase.js"
 
 export const getObservationsByDate = async (req, res) => {
   try {
-    const { data, error } = await supabase
+    const client = supabaseAdmin || supabasePublic
+    const { data, error } = await client
       .from("observations")
       .select("*")
       .order("created_at", { ascending: false })

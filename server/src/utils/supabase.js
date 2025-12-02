@@ -6,23 +6,26 @@ dotenv.config()
 dotenv.config({ path: '.env.local' })
 
 const url = process.env.SUPABASE_URL
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+const anonKey = process.env.SUPABASE_ANON_KEY
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 if (!url) {
   console.warn('[supabase] SUPABASE_URL manquant dans .env')
 }
-if (!serviceRoleKey) {
+if (!anonKey && !serviceRoleKey) {
   console.warn('[supabase] Aucune clé fournie (SERVICE_ROLE ou ANON).')
 }
-if (serviceRoleKey && serviceRoleKey.startsWith('eyJhbGciOi')) {
-  // Basic length sanity check
-  if (serviceRoleKey.length < 100) {
-    console.warn('[supabase] Clé semble trop courte, vérifier copier/coller.')
-  }
-}
 
-export const supabase = createClient(url, serviceRoleKey, {
-  auth: {
-    persistSession: false
-  }
-})
+// Two clients:
+// - supabasePublic: use ANON key (required for auth.* methods)
+// - supabaseAdmin: use SERVICE_ROLE key (for privileged DB operations)
+export const supabasePublic = anonKey
+  ? createClient(url, anonKey, { auth: { persistSession: false } })
+  : null
+
+export const supabaseAdmin = serviceRoleKey
+  ? createClient(url, serviceRoleKey, { auth: { persistSession: false } })
+  : null
+
+// Backward export for existing imports (defaults to admin if present, else public)
+export const supabase = supabaseAdmin || supabasePublic
