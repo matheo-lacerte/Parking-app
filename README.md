@@ -68,3 +68,8 @@ Push to `main` and deploy with Vercel. The file `vercel.json` ensures all `api/*
 - `api/auth/*`, `api/observations/*`, `api/health/*`: serverless function handlers
 - `server/src/controllers/*`, `server/src/middleware/*`, `server/src/utils/supabase.js`: shared logic
 - `vercel.json`: function bundling config
+
+## Cleanup notes
+
+- The legacy Express server (`server/src/index.js`, `server/src/app.js`) and `server/package.json` were removed; the app is fully serverless.
+- Use `.env` / `.env.local` at repo root (or Vercel envs). See `.env.example`.
