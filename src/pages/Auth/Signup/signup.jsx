@@ -36,7 +36,8 @@ const Signup = () => {
 				const data = await res.json();
 				if (!res.ok) throw new Error(data.error || 'Erreur inscription');
 				setMessage(data.message || 'Inscription réussie');
-				setTimeout(() => navigate('/login'), 1200);
+				// Redirige toujours vers la page de vérification courriel après création du compte
+				setTimeout(() => navigate('/check-email'), 800);
 			} catch (err) {
 				setError(err.message);
 			} finally {
