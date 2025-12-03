@@ -14,6 +14,28 @@ import signupHandler from './auth/signup.js';
 import observationsByDate from './observations/byDate.js';
 import healthHandler from './health/index.js';
 
+// Add tiny response helpers to mimic Express API on Vercel/Node ServerResponse
+function enhanceRes(res) {
+	if (typeof res.status !== 'function') {
+		res.status = (code) => { res.statusCode = code; return res; };
+	}
+	if (typeof res.json !== 'function') {
+		res.json = (obj) => {
+			try { res.setHeader('content-type', 'application/json'); } catch {}
+			res.end(JSON.stringify(obj));
+		};
+	}
+	if (typeof res.send !== 'function') {
+		res.send = (body) => {
+			if (body === undefined || body === null) return res.end('');
+			if (typeof body === 'object') return res.json(body);
+			try { res.setHeader('content-type', 'text/plain; charset=utf-8'); } catch {}
+			return res.end(String(body));
+		};
+	}
+	return res;
+}
+
 const runAuth = (req, res) => new Promise((resolve) => {
 	const next = () => resolve(true);
 	authMiddleware(req, res, next);
@@ -21,14 +43,16 @@ const runAuth = (req, res) => new Promise((resolve) => {
 
 export default async function handler(req, res) {
 	try {
+	enhanceRes(res);
 	const url = new URL(req.url, 'http://localhost');
 	const path = url.pathname.replace(/^\/api/, '');
 
 	// Ensure JSON body is parsed for POST/PUT/PATCH with application/json
 	const methodHasBody = req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH';
 	const isJson = (req.headers['content-type'] || '').includes('application/json');
-	if (methodHasBody && isJson && (req.body === undefined || req.body === null)) {
+	if (methodHasBody && isJson) {
 		try {
+			// Always read request stream to build a proper JSON body
 			const chunks = [];
 			await new Promise((resolve, reject) => {
 				req.on('data', (c) => chunks.push(c));
@@ -40,6 +64,9 @@ export default async function handler(req, res) {
 		} catch (e) {
 			return res.status(400).json({ error: 'Invalid JSON body' });
 		}
+	} else if (req.body === undefined) {
+		// Ensure handlers can safely destructure
+		req.body = {};
 	}
 
 	// Household
