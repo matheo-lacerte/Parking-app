@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useLoading } from "../../context/LoadingContext.jsx";
 import { apiFetch } from "../../lib/api.js";
-import "./households.css";
+import "../households.css";
 
 export default function Home() {
   const { token } = useAuth();
