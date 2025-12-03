@@ -65,6 +65,17 @@ export const signup = async (req, res) => {
             .from("users")
             .update({ household_id, account_status })
             .eq("id", user.id)
+
+        const { data: newHouseholdUser} = await client
+            .from("household_members")
+            .insert({
+                household_id,
+                user_id: user.id,
+                role: "Owner",
+                status: "accepted"
+            })
+            .select()
+            .single()
     }
 
     return res.status(200).json({

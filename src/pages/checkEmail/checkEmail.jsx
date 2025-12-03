@@ -24,7 +24,6 @@ export default function CheckEmail() {
 				</p>
 				<ul className="check-email-tips">
 					<li>Actualisez votre boîte de réception.</li>
-					<li>Ajoutez l’adresse d’expéditeur à vos contacts pour éviter le spam.</li>
 					<li>Vous avez fait une erreur d’email ? <Link to="/signup" className="inline-link">Recréez un compte</Link>.</li>
 				</ul>
 				<div className="check-email-actions">

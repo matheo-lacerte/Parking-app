@@ -88,7 +88,7 @@ export default function Profile() {
             <button type="button" className="profile-action-item" onClick={() => alert('Settings à venir')}> 
               <div className="profile-action-left">
                 <span className="profile-action-icon">⚙️</span>
-                <span className="profile-action-text">Settings</span>
+                <span className="profile-action-text">Paramètres</span>
               </div>
             </button>
           </li>
@@ -101,7 +101,7 @@ export default function Profile() {
             >
               <div className="profile-action-left">
                 <span className="profile-action-icon">🔓</span>
-                <span className="profile-action-text">Log out</span>
+                <span className="profile-action-text">Déconnexion</span>
               </div>
             </button>
           </li>
