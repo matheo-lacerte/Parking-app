@@ -75,6 +75,44 @@ export default function Home() {
 
   useEffect(() => {
     if (!token) return;
+    // Accept invite from email link: ?accept=1&householdId=...&email=...
+    const url = new URL(window.location.href);
+    const accept = url.searchParams.get('accept');
+    const inviteToken = url.searchParams.get('invite');
+    if (accept === '1' && inviteToken) {
+      wrapPromise(async () => {
+        try {
+          const res = await apiFetch('/household/accept', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ invite: inviteToken }),
+          });
+          if (res.ok) {
+            // Clean query params and refresh members/address
+            const cleanUrl = `${url.pathname}`;
+            window.history.replaceState({}, '', cleanUrl);
+            const mRes = await apiFetch('/household/members', {
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            });
+            const mData = mRes.ok ? await mRes.json() : [];
+            setMembers(Array.isArray(mData) ? mData : []);
+            const aRes = await apiFetch('/household/address', {
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            });
+            const aData = aRes.ok ? await aRes.json() : null;
+            setAddress(Array.isArray(aData) ? (aData[0] ?? null) : (aData ?? null));
+          } else {
+            const data = await res.json().catch(() => ({}));
+            setError(data.error || 'Échec lors de l\'acceptation de l\'invitation');
+          }
+        } catch (e) {
+          setError(e.message);
+        }
+      });
+    }
     wrapPromise(async () => {
       try {
         const res = await apiFetch('/auth/getProfile', {
@@ -147,16 +185,57 @@ export default function Home() {
         <h2 className="households-members-title">Membres du foyer</h2>
         {members.length > 0 && (
           <ul className="household-list">
-            {members.map((m) => (
-              <li key={m.user_id} className="household-item">
-                <div className="household-item-name">
-                  {(m.name || m.last_name) ? `${m.name ?? ''} ${m.last_name ?? ''}`.trim() : m.email || m.user_id}
-                </div>
-                <div className={`household-item-meta ${m.role === 'Owner' ? 'is-owner' : 'is-member'}`}>
-                  {m.role === 'Owner' ? 'Propriétaire' : 'Membre'}
-                </div>
-              </li>
-            ))}
+            {members.map((m) => {
+              const isPending = m.status === 'pending'
+              const isOwner = m.role === 'Owner'
+              const currentIsOwner = members.some(x => x.user_id === currentUserId && x.role === 'Owner')
+              return (
+                <li key={m.user_id || m.email} className={`household-item`}>
+                  <div className="household-item-name">
+                    {(m.name || m.last_name) ? `${m.name ?? ''} ${m.last_name ?? ''}`.trim() : (m.email || m.user_id)}
+                  </div>
+                  <div className="household-item-meta">
+                    {isOwner && (
+                      <span className="role-badge owner">Propriétaire</span>
+                    )}
+                    {m.role === 'Member' && (
+                      <span className="role-text">Membre</span>
+                    )}
+                    {isPending && (
+                      <span className="invite-badge">Invité (en attente)</span>
+                    )}
+                  </div>
+                  {isPending && currentIsOwner && (
+                    <button
+                      className="household-cancel-invite badge-button"
+                      onClick={async () => {
+                        try {
+                          const res = await apiFetch('/household/cancel', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                            body: JSON.stringify({ householdId: address?.id, email: m.email || undefined, userId: m.user_id || undefined }),
+                          })
+                          if (!res.ok) {
+                            const data = await res.json().catch(() => ({}))
+                            alert(data.error || "Échec de l'annulation")
+                            return
+                          }
+                          const mRes = await apiFetch('/household/members', {
+                            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                          })
+                          const mData = mRes.ok ? await mRes.json() : []
+                          setMembers(Array.isArray(mData) ? mData : [])
+                        } catch (e) {
+                          alert(e.message)
+                        }
+                      }}
+                    >
+                      Annuler l'invitation
+                    </button>
+                  )}
+                </li>
+              )
+            })}
           </ul>
         )}
         {members.some(m => m.user_id === currentUserId && m.role === 'Owner') && (

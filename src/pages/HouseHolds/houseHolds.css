@@ -1,3 +1,51 @@
+/* Role and invite badges */
+.role-badge {
+	display: inline-block;
+	font-size: 12px;
+	line-height: 1;
+	padding: 6px 10px;
+	border-radius: 999px;
+	margin-right: 8px;
+}
+.role-badge.owner {
+	background: #e0f2fe;
+	color: #0369a1;
+}
+/* Member role rendered as plain text */
+.role-text {
+	display: inline-block;
+	font-size: 12px;
+	color: #374151;
+	margin-right: 8px;
+}
+
+.invite-badge {
+	display: inline-block;
+	font-size: 12px;
+	line-height: 1;
+	padding: 6px 10px;
+	border-radius: 999px;
+	background: #fff7d6; /* pale yellow */
+	color: #92400e;
+	border: 1px solid #f5e3a1;
+	margin-left: 4px;
+}
+
+.badge-button.household-cancel-invite {
+	display: inline-block;
+	font-size: 12px;
+	line-height: 1;
+	padding: 6px 10px;
+	border-radius: 999px;
+	border: 1px solid #fecaca;
+	background: #fee2e2;
+	color: #7f1d1d;
+	margin-left: 8px;
+	cursor: pointer;
+}
+.badge-button.household-cancel-invite:hover {
+	background: #ffc9c9;
+}
 .households-card:nth-of-type(2) .household-item {
 	display: grid;
 	grid-template-columns: 1fr auto;
@@ -214,29 +262,15 @@
 
 
 
+
 .household-item-meta {
-	font-size: 0.85rem;
-	color: #1d2741;
-	padding: 6px 10px;
-	border-radius: 999px;
-	border: 1px solid #e2e8f0;
-	background: #f8fafc;
-	min-width: 110px;
-	text-align: center;
+	display: flex;
+	align-items: center;
+	gap: 8px;
 }
 
 /* Badge tone variants based on role */
-.household-item-meta.is-owner {
-	color: #064e3b;
-	background: #ecfdf5;
-	border-color: #a7f3d0;
-}
-
-.household-item-meta.is-member {
-	color: #374151;
-	background: #f3f4f6;
-	border-color: #e5e7eb;
-}
+/* Remove old pill styling from meta container */
 
 /* Feedback */
 .households-loading {

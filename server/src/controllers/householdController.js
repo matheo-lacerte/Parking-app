@@ -1,4 +1,5 @@
 import { supabaseAdmin, supabasePublic } from "../utils/supabase.js"
+import crypto from "crypto"
 
 export const getHouseholdMembers = async (req, res) => {
   try {
@@ -11,7 +12,7 @@ export const getHouseholdMembers = async (req, res) => {
 
     const { data: members, error } = await client
       .from("household_members")
-      .select("user_id, role, status")
+      .select("user_id, role, status, email")
       .eq("household_id", householdId)
 
     if (error) {
@@ -45,6 +46,7 @@ export const getHouseholdMembers = async (req, res) => {
         last_name: u?.last_name ?? null,
         role: m.role,
         status: m.status,
+        email: m.email ?? null,
         numberOfMembers: members.length,
       }
     })
@@ -206,37 +208,84 @@ export const inviteMember = async (req, res) => {
     const householdParam = encodeURIComponent(String(householdId))
     const emailParam = encodeURIComponent(email)
 
-    const acceptInviteUrl = `${baseUrl}/households?accept=1&householdId=${householdParam}&email=${emailParam}`
-    const signupThenJoinUrl = `${baseUrl}/auth/signup?householdId=${householdParam}&email=${emailParam}`
+    // Build signed invite token to avoid exposing PII in query params
+    const INVITE_SECRET = process.env.APP_INVITE_SECRET || process.env.APP_SECRET || process.env.JWT_SECRET
+    const makeToken = (payload) => {
+      const data = Buffer.from(JSON.stringify(payload)).toString('base64url')
+      const sig = crypto.createHmac('sha256', String(INVITE_SECRET || 'fallback-secret')).update(data).digest('base64url')
+      return `${data}.${sig}`
+    }
+    const tokenPayload = { householdId, email, iat: Date.now(), exp: Date.now() + 7 * 24 * 60 * 60 * 1000 }
+    const inviteToken = makeToken(tokenPayload)
+    const acceptInviteUrl = `${baseUrl}/households?accept=1&invite=${encodeURIComponent(inviteToken)}`
+    const signupThenJoinUrl = `${baseUrl}/auth/signup?invite=${encodeURIComponent(inviteToken)}`
 
     const inviterName = [inviter?.name, inviter?.last_name].filter(Boolean).join(" ") || "Un membre"
     const subjectExisting = `Invitation à rejoindre un foyer`
     const subjectNew = `Créez votre compte et rejoignez un foyer`
 
+    const htmlBaseHeader = `
+      <h2 style="font-size:20px; font-weight:600; margin-bottom:10px;">EspaceD — Invitation</h2>
+    `
+    const htmlFooter = `
+      <hr style="margin:30px 0; opacity:0.25;" />
+      <p style="font-size:13px; color:#777; margin-bottom:10px;">
+        Si vous n'êtes pas à l'origine de cette invitation, vous pouvez ignorer ce message.
+      </p>
+      <p style="font-size:12px; color:#999; text-align:center;">
+        ⚠ Ceci est un courriel automatique — merci de ne pas répondre à ce message.
+      </p>
+    `
+
     const htmlExisting = `
       <div style="font-family:Arial,sans-serif;color:#222">
-        <h2>Invitation à rejoindre un foyer</h2>
-        <p>${inviterName} vous a invité à rejoindre son foyer.</p>
-        <p>Appuyez sur le bouton ci-dessous pour accepter l'invitation.</p>
-        <p><a href="${acceptInviteUrl}" style="display:inline-block;background:#2563eb;color:#fff;padding:12px 16px;border-radius:6px;text-decoration:none">Accepter l'invitation</a></p>
-        <p style="font-size:12px;color:#555">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur:<br />
-        <a href="${acceptInviteUrl}">${acceptInviteUrl}</a></p>
+        ${htmlBaseHeader}
+        <p style="font-size:16px; margin-bottom:15px;">
+          ${inviterName} vous a invité à rejoindre son foyer sur EspaceD.
+        </p>
+        <p style="font-size:16px; margin-bottom:20px;">
+          Cliquez sur le bouton ci-dessous pour accepter l'invitation :
+        </p>
+        <p style="text-align:center; margin:30px 0;">
+          <a href="${acceptInviteUrl}"
+             style="background:#2563eb; padding:12px 22px; border-radius:6px; color:white; font-weight:600; text-decoration:none; font-size:16px;">
+             Accepter l'invitation
+          </a>
+        </p>
+        <p style="margin-top:25px; font-size:14px; color:#666;">
+          Si le bouton ne fonctionne pas, vous pouvez copier-coller ce lien dans votre navigateur :<br/>
+          <span style="color:#2563eb; word-break:break-all;">${acceptInviteUrl}</span>
+        </p>
+        ${htmlFooter}
       </div>
     `
 
     const htmlNew = `
       <div style="font-family:Arial,sans-serif;color:#222">
-        <h2>Vous êtes invité à rejoindre un foyer</h2>
-        <p>${inviterName} vous a invité à rejoindre son foyer, mais vous n'avez pas encore de compte.</p>
-        <p>Créez d'abord votre compte, puis vous pourrez rejoindre le foyer immédiatement.</p>
-        <p><a href="${signupThenJoinUrl}" style="display:inline-block;background:#16a34a;color:#fff;padding:12px 16px;border-radius:6px;text-decoration:none">Créer mon compte et rejoindre</a></p>
-        <p style="font-size:12px;color:#555">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur:<br />
-        <a href="${signupThenJoinUrl}">${signupThenJoinUrl}</a></p>
+        ${htmlBaseHeader}
+        <p style="font-size:16px; margin-bottom:15px;">
+          ${inviterName} vous a invité à rejoindre son foyer sur EspaceD.
+          Vous n'avez pas encore de compte.
+        </p>
+        <p style="font-size:16px; margin-bottom:20px;">
+          Créez d'abord votre compte, puis vous pourrez rejoindre le foyer immédiatement :
+        </p>
+        <p style="text-align:center; margin:30px 0;">
+          <a href="${signupThenJoinUrl}"
+             style="background:#16a34a; padding:12px 22px; border-radius:6px; color:white; font-weight:600; text-decoration:none; font-size:16px;">
+             Créer mon compte et rejoindre
+          </a>
+        </p>
+        <p style="margin-top:25px; font-size:14px; color:#666;">
+          Si le bouton ne fonctionne pas, vous pouvez copier-coller ce lien dans votre navigateur :<br/>
+          <span style="color:#16a34a; word-break:break-all;">${signupThenJoinUrl}</span>
+        </p>
+        ${htmlFooter}
       </div>
     `
 
     const mailOptions = {
-      from: SMTP_FROM,
+      from: `EspaceD <${SMTP_FROM}>`,
       to: email,
       subject: targetUser ? subjectExisting : subjectNew,
       html: targetUser ? htmlExisting : htmlNew,
@@ -251,14 +300,32 @@ export const inviteMember = async (req, res) => {
           .upsert({
             household_id: householdId,
             user_id: targetUser.id,
-            role: "Member",
-            status: "invited",
-          }, { onConflict: "household_id,user_id" })
+            role: "invited",
+            status: "pending",
+          }, { onConflict: "user_id" })
         if (upsertErr) {
           console.warn("inviteMember upsert warning:", upsertErr)
         }
       } catch (e) {
         console.warn("inviteMember upsert crash:", e)
+      }
+    } else {
+      // No account yet: create membership with email only and pending status
+      try {
+        const { error: insertErr } = await client
+          .from("household_members")
+          .insert({
+            household_id: householdId,
+            user_id: null, // avoid default gen_random_uuid() causing FK violation
+            role: "invited",
+            status: "pending",
+            email,
+          })
+        if (insertErr) {
+          console.warn("inviteMember insert warning:", insertErr)
+        }
+      } catch (e) {
+        console.warn("inviteMember insert crash:", e)
       }
     }
 
@@ -266,5 +333,184 @@ export const inviteMember = async (req, res) => {
   } catch (err) {
     console.error("inviteMember crash:", err)
     return res.status(500).json({ error: "Erreur serveur lors de l'envoi de l'invitation." })
+  }
+}
+
+export const acceptInvite = async (req, res) => {
+  try {
+    const client = supabaseAdmin || supabasePublic
+    const user = req.userProfile
+    const userId = user?.id
+    const householdIdParam = Number(req.body?.householdId || req.query?.householdId)
+    const emailParam = (req.body?.email || req.query?.email || '').trim()
+    const inviteToken = (req.body?.invite || req.query?.invite || '').trim()
+    let householdId = householdIdParam
+    let email = emailParam
+
+    // If a signed invite token is provided, verify and extract data
+    if (inviteToken) {
+      try {
+        const [dataB64, sigB64] = inviteToken.split('.')
+        if (!dataB64 || !sigB64) throw new Error('Bad token format')
+        const secret = String(process.env.APP_INVITE_SECRET || process.env.APP_SECRET || process.env.JWT_SECRET || 'fallback-secret')
+        const expectedSig = crypto.createHmac('sha256', secret).update(dataB64).digest('base64url')
+        if (expectedSig !== sigB64) throw new Error('Invalid token signature')
+        const payloadJson = Buffer.from(dataB64, 'base64url').toString('utf8')
+        const payload = JSON.parse(payloadJson)
+        if (typeof payload.exp === 'number' && Date.now() > payload.exp) throw new Error('Token expired')
+        householdId = Number(payload.householdId)
+        email = String(payload.email || '')
+      } catch (e) {
+        console.warn('acceptInvite token verify warn:', e?.message || e)
+        // Fall back to explicit params if present
+      }
+    }
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Non authentifié.' })
+    }
+    if (!householdId) {
+      return res.status(400).json({ error: 'householdId manquant.' })
+    }
+
+    // Find a pending membership for this user or their email
+    const { data: membershipByUser } = await client
+      .from('household_members')
+      .select('*')
+      .eq('household_id', householdId)
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    let pendingMembership = membershipByUser
+    if (!pendingMembership && email) {
+      const { data: membershipByEmail } = await client
+        .from('household_members')
+        .select('*')
+        .eq('household_id', householdId)
+        .ilike('email', email)
+        .maybeSingle()
+      pendingMembership = membershipByEmail || null
+    }
+
+    if (!pendingMembership) {
+      return res.status(404).json({ error: 'Invitation introuvable.' })
+    }
+
+    // If membership was created by email only, attach the authenticated user_id
+    const updateFields = { status: 'active' }
+    if (!pendingMembership.user_id) {
+      updateFields.user_id = userId
+      updateFields.email = pendingMembership.email // keep or null; we keep for trace
+    }
+
+    const { error: updateErr } = await client
+      .from('household_members')
+      .update(updateFields)
+      .eq('id', pendingMembership.id)
+
+    if (updateErr) {
+      console.error('acceptInvite updateErr:', updateErr)
+      return res.status(500).json({ error: "Erreur lors de l'activation de l'invitation." })
+    }
+
+    // Ensure user's profile points to the household
+    const { error: userUpdateErr } = await client
+      .from('users')
+      .update({ household_id: householdId, account_status: 'active' })
+      .eq('id', userId)
+
+    if (userUpdateErr) {
+      console.error('acceptInvite userUpdateErr:', userUpdateErr)
+      // Do not fail overall; return success with warning
+    }
+
+    return res.status(200).json({ message: 'Invitation acceptée. Membre actif du foyer.' })
+  } catch (err) {
+    console.error('acceptInvite crash:', err)
+    return res.status(500).json({ error: 'Erreur serveur.' })
+  }
+}
+
+export const cancelInvite = async (req, res) => {
+  try {
+    const client = supabaseAdmin || supabasePublic
+    const inviter = req.userProfile
+    const inviterHouseholdId = inviter?.household_id
+    const { householdId, email, userId } = req.body || {}
+
+    if (!inviterHouseholdId) {
+      return res.status(400).json({ error: 'householdId manquant pour l\'inviteur.' })
+    }
+    const targetHouseholdId = Number(householdId || inviterHouseholdId)
+    if (!targetHouseholdId) {
+      return res.status(400).json({ error: 'householdId manquant.' })
+    }
+    if (!email && !userId) {
+      return res.status(400).json({ error: 'Spécifiez email ou userId de l\'invité.' })
+    }
+
+    // Find membership to cancel (pending only)
+    let query = client.from('household_members').select('*').eq('household_id', targetHouseholdId)
+    if (userId) query = query.eq('user_id', userId)
+    if (email) query = query.ilike('email', email)
+    const { data: membership, error: findErr } = await query.maybeSingle()
+    if (findErr) {
+      console.error('cancelInvite findErr:', findErr)
+      return res.status(500).json({ error: 'Erreur lors de la recherche de l\'invitation.' })
+    }
+    if (!membership) {
+      return res.status(404).json({ error: 'Invitation introuvable.' })
+    }
+    if (membership.status !== 'pending') {
+      return res.status(400).json({ error: 'Seules les invitations en attente peuvent être annulées.' })
+    }
+
+    // Delete or mark canceled
+    const { error: delErr } = await client
+      .from('household_members')
+      .delete()
+      .eq('id', membership.id)
+    if (delErr) {
+      console.error('cancelInvite delErr:', delErr)
+      return res.status(500).json({ error: 'Erreur lors de l\'annulation de l\'invitation.' })
+    }
+
+    // Send cancellation email using SMTP config
+    const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, APP_BASE_URL } = process.env
+    if (SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS && SMTP_FROM) {
+      try {
+        const nodemailer = (await import('nodemailer')).default
+        const transporter = nodemailer.createTransport({
+          host: SMTP_HOST,
+          port: Number(SMTP_PORT),
+          secure: Number(SMTP_PORT) === 465,
+          auth: { user: SMTP_USER, pass: SMTP_PASS },
+        })
+        const baseUrl = APP_BASE_URL || 'https://parking-app.example.com'
+        const inviterName = [inviter?.name, inviter?.last_name].filter(Boolean).join(' ') || 'Un membre'
+        const toAddress = membership.email || email
+
+        if (toAddress) {
+          const html = `
+            <div style="font-family:Arial,sans-serif;color:#222">
+              <h2 style="font-size:20px; font-weight:600; margin-bottom:10px;">EspaceD — Invitation annulée</h2>
+              <p style="font-size:16px; margin-bottom:15px;">${inviterName} a annulé l'invitation à rejoindre son foyer sur EspaceD.</p>
+              <p style="font-size:14px; color:#666; margin-bottom:20px;">Si vous pensez que c'est une erreur, contactez l'inviteur.</p>
+              <hr style="margin:30px 0; opacity:0.25;" />
+              <p style="font-size:12px; color:#999; text-align:center;">⚠ Ceci est un courriel automatique — merci de ne pas répondre à ce message.</p>
+              <p style="font-size:12px; color:#666; text-align:center;">EspaceD • <a href="${baseUrl}">${baseUrl}</a></p>
+            </div>
+          `
+          await transporter.sendMail({ from: `EspaceD <${SMTP_FROM}>`, to: toAddress, subject: 'Invitation annulée', html })
+        }
+      } catch (e) {
+        console.warn('cancelInvite mail warn:', e)
+      }
+    }
+
+    return res.status(200).json({ message: 'Invitation annulée.' })
+  } catch (err) {
+    console.error('cancelInvite crash:', err)
+    return res.status(500).json({ error: 'Erreur serveur.' })
   }
 }
