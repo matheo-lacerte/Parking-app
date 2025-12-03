@@ -10,6 +10,12 @@
     { "source": "/household/quit", "destination": "/api/index" },
     { "source": "/household/invite", "destination": "/api/index" },
     { "source": "/household/accept", "destination": "/api/index" },
-    { "source": "/household/cancel", "destination": "/api/index" }
+    { "source": "/household/cancel", "destination": "/api/index" },
+    { "source": "/auth/getProfile", "destination": "/api/index" },
+    { "source": "/auth/login", "destination": "/api/index" },
+    { "source": "/auth/logout", "destination": "/api/index" },
+    { "source": "/auth/signup", "destination": "/api/index" },
+    { "source": "/observations/byDate", "destination": "/api/index" },
+    { "source": "/health", "destination": "/api/index" }
   ]
 }
