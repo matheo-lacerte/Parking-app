@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useLoading } from "../../context/LoadingContext.jsx";
 import { apiFetch } from "../../lib/api.js";
-import "./houseHolds.css";
 import "./households.css";
 
 export default function Home() {
