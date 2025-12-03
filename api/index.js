@@ -7,12 +7,9 @@ import {
 	acceptInvite,
 	cancelInvite,
 } from '../server/src/controllers/householdController.js';
-import getProfile from './auth/getProfile.js';
-import loginHandler from './auth/login.js';
-import logoutHandler from './auth/logout.js';
-import signupHandler from './auth/signup.js';
-import observationsByDate from './observations/byDate.js';
-import healthHandler from './health/index.js';
+import { login, logout, signup, getProfile as getProfileController } from '../server/src/controllers/AuthController.js';
+import { getObservationsByDate } from '../server/src/controllers/signalController.js';
+import { supabaseAdmin, supabasePublic } from '../server/src/utils/supabase.js';
 
 // Add tiny response helpers to mimic Express API on Vercel/Node ServerResponse
 function enhanceRes(res) {
@@ -105,33 +102,70 @@ export default async function handler(req, res) {
 	if (path === '/auth/getProfile') {
 		if (req.method !== 'GET') { res.setHeader('Allow', 'GET'); return res.status(405).json({ error: 'Method Not Allowed' }); }
 		const ok = await runAuth(req, res); if (!ok) return;
-		return getProfile(req, res);
+		return getProfileController(req, res);
 	}
 	if (path === '/auth/login') {
 		if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ error: 'Method Not Allowed' }); }
-		return loginHandler(req, res);
+		return login(req, res);
 	}
 	if (path === '/auth/logout') {
 		if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ error: 'Method Not Allowed' }); }
 		const ok = await runAuth(req, res); if (!ok) return;
-		return logoutHandler(req, res);
+		return logout(req, res);
 	}
 	if (path === '/auth/signup') {
 		if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ error: 'Method Not Allowed' }); }
-		return signupHandler(req, res);
+		return signup(req, res);
 	}
 
 	// Observations
 	if (path === '/observations/byDate') {
 		if (req.method !== 'GET') { res.setHeader('Allow', 'GET'); return res.status(405).json({ error: 'Method Not Allowed' }); }
 		const ok = await runAuth(req, res); if (!ok) return;
-		return observationsByDate(req, res);
+		return getObservationsByDate(req, res);
 	}
 
 	// Health
 	if (path === '/health') {
 		if (req.method !== 'GET') { res.setHeader('Allow', 'GET'); return res.status(405).json({ error: 'Method Not Allowed' }); }
-		return healthHandler(req, res);
+		const startedAt = Date.now();
+		let supabase_status = 'unknown';
+		let supabase_latency_ms = null;
+		let supabase_error = null;
+		const hasUrl = !!process.env.SUPABASE_URL;
+		const hasServiceRole = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+		const hasAnon = !!process.env.SUPABASE_ANON_KEY;
+		try {
+			const t0 = Date.now();
+			const client = supabaseAdmin || supabasePublic;
+			const { error } = await client.from('users').select('id').limit(1);
+			supabase_latency_ms = Date.now() - t0;
+			if (error) {
+				supabase_status = 'error';
+				supabase_error = error.message || String(error);
+			} else {
+				supabase_status = 'ok';
+			}
+		} catch (e) {
+			supabase_status = 'exception';
+			supabase_error = e.message || String(e);
+		}
+
+		return res.json({
+			status: 'ok',
+			timestamp: new Date().toISOString(),
+			uptime_ms: Date.now() - startedAt,
+			supabase: {
+				status: supabase_status,
+				latency_ms: supabase_latency_ms,
+				error: supabase_error,
+			},
+			env: {
+				supabase_url_present: hasUrl,
+				supabase_key_present: hasServiceRole || hasAnon,
+				supabase_key_type: hasServiceRole ? 'service_role' : hasAnon ? 'anon' : null,
+			},
+		});
 	}
 
 	return res.status(404).json({ error: 'Not Found' });

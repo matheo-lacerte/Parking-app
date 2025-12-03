@@ -1,12 +1,7 @@
 {
   "functions": {
     "api/index.js": {
-      "includeFiles": [
-        "server/**",
-        "api/auth/**",
-        "api/health/**",
-        "api/observations/**"
-      ]
+      "includeFiles": "server/**"
     }
   },
   "rewrites": [
