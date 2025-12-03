@@ -38,12 +38,20 @@ export default defineConfig({
   ],
   server: {
     port: 5173,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:4000',
-        changeOrigin: true,
-        secure: false,
-      },
-    },
+    // Enable proxy only when explicitly targeting local API server
+    // Set VITE_API_BASE_URL to e.g. "http://localhost:4000/api" to activate
+    proxy: (() => {
+      const base = process.env.VITE_API_BASE_URL || ''
+      const isLocal4000 = /localhost:4000|127\.0\.0\.1:4000/.test(base)
+      if (!isLocal4000) return undefined
+      const target = base.replace(/\/api$/, '')
+      return {
+        '/api': {
+          target,
+          changeOrigin: true,
+          secure: false,
+        },
+      }
+    })(),
   },
 })
