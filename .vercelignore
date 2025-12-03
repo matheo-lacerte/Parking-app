@@ -1,0 +1,10 @@
+api/household/members.js
+api/household/invite.js
+api/household/accept.js
+api/household/cancel.js
+api/household/address.js
+api/household/quit.js
+api/auth/getProfile.js
+api/auth/login.js
+api/auth/logout.js
+api/auth/signup.js
