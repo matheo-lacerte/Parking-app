@@ -20,6 +20,7 @@ const runAuth = (req, res) => new Promise((resolve) => {
 });
 
 export default async function handler(req, res) {
+	try {
 	const url = new URL(req.url, 'http://localhost');
 	const path = url.pathname.replace(/^\/api/, '');
 
@@ -107,4 +108,13 @@ export default async function handler(req, res) {
 	}
 
 	return res.status(404).json({ error: 'Not Found' });
+	} catch (err) {
+		console.error('[api] Unhandled error', err);
+		try {
+			return res.status(500).json({ error: 'Internal Server Error', details: err?.message });
+		} catch {
+			res.statusCode = 500;
+			res.end('Internal Server Error');
+		}
+	}
 }
