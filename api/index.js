@@ -23,6 +23,24 @@ export default async function handler(req, res) {
 	const url = new URL(req.url, 'http://localhost');
 	const path = url.pathname.replace(/^\/api/, '');
 
+	// Ensure JSON body is parsed for POST/PUT/PATCH with application/json
+	const methodHasBody = req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH';
+	const isJson = (req.headers['content-type'] || '').includes('application/json');
+	if (methodHasBody && isJson && (req.body === undefined || req.body === null)) {
+		try {
+			const chunks = [];
+			await new Promise((resolve, reject) => {
+				req.on('data', (c) => chunks.push(c));
+				req.on('end', resolve);
+				req.on('error', reject);
+			});
+			const raw = Buffer.concat(chunks).toString('utf8');
+			req.body = raw ? JSON.parse(raw) : {};
+		} catch (e) {
+			return res.status(400).json({ error: 'Invalid JSON body' });
+		}
+	}
+
 	// Household
 	if (path === '/household/members') {
 		if (req.method !== 'GET') { res.setHeader('Allow', 'GET'); return res.status(405).json({ error: 'Method Not Allowed' }); }
