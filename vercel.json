@@ -1,7 +1,15 @@
 {
   "functions": {
-    "api/**/*": {
+    "api/index.js": {
       "includeFiles": "server/**"
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/household/members", "destination": "/api/index" },
+    { "source": "/household/address", "destination": "/api/index" },
+    { "source": "/household/quit", "destination": "/api/index" },
+    { "source": "/household/invite", "destination": "/api/index" },
+    { "source": "/household/accept", "destination": "/api/index" },
+    { "source": "/household/cancel", "destination": "/api/index" }
+  ]
 }
