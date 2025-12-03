@@ -1,4 +1,4 @@
-import { getHouseholdInfo } from '../../server/src/controllers/householdController.js';
+import { quitHousehold } from '../../server/src/controllers/householdController.js';
 import { authMiddleware } from '../../server/src/middleware/auth.js';
 
 const runAuth = (req, res) => new Promise((resolve) => {
@@ -7,11 +7,11 @@ const runAuth = (req, res) => new Promise((resolve) => {
 });
 
 export default async function handler(req, res) {
-  if (req.method !== 'GET') {
-    res.setHeader('Allow', 'GET');
+  if (req.method !== 'DELETE' && req.method !== 'UPDATE') {
+    res.setHeader('Allow', 'DELETE, UPDATE');
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
   const ok = await runAuth(req, res);
   if (!ok) return;
-  return getHouseholdInfo(req, res);
+  return quitHousehold(req, res);
 }

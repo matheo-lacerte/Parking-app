@@ -4,6 +4,7 @@ import App from './App.jsx';
 import Home from './pages/Home/Home.jsx';
 import Profile from './pages/Profile/Profile.jsx';
 import NotFound from './pages/NotFound.jsx';
+import HouseholdWaiting from './pages/HouseholdWaiting/Waiting.jsx';
 import CameraCapture from './components/cameracapture/CameraCapture.jsx';
 import ParkingZone from './components/parkingzone/ParkingZone.jsx';
 import Success from './pages/Success.jsx';
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
       { path: 'signup', element: <Signup /> },
       { path: 'check-email', element: <CheckEmail /> },
       { path: 'households', element: <ProtectedRoute><HouseHolds /></ProtectedRoute> },
+      { path: 'household/waiting', element: <ProtectedRoute><HouseholdWaiting /></ProtectedRoute> },
       { path: '*', element: <NotFound /> },
 
     ],

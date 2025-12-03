@@ -1,0 +1,301 @@
+{
+  "info": {
+    "_postman_id": "57ba3bc3-fd47-4b27-a92a-6f8076e0270f",
+    "name": "Parking App API",
+    "description": "Complete API collection for the Parking App - a serverless application built with Vercel Functions. This collection includes all authentication, household management, observations, and health check endpoints.\n\n## Authentication\nMost endpoints require Bearer token authentication. After logging in, use the `access_token` from the response in the Authorization header:\n```\nAuthorization: Bearer {{access_token}}\n```\n\n## Base URL\nLocal: `http://localhost:3000`\nProduction: Your Vercel deployment URL",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Signup",
+          "id": "84d61b60-2537-4a8e-9ca3-7792649dbf53",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePassword123!\",\n  \"address\": \"123 Main Street, City, Country\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signup",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "signup"
+              ]
+            },
+            "description": "Register a new user account. Creates a new user and either:\n- Creates a new household if the address doesn't exist (account becomes active immediately)\n- Links to existing household if address exists (account status becomes pending)\n\n**Request Body:**\n- `name` (string, required): User's first name\n- `last_name` (string, required): User's last name\n- `email` (string, required): User's email address\n- `password` (string, required): User's password\n- `address` (string, required): Household address\n\n**Response:**\n- `message`: Success message indicating account status\n- `account_status`: \"active\" or \"pending\"\n- `household_id`: ID of the household\n- `user_id`: ID of the created user"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "c4f18adf-f618-408d-b460-8c774a665422",
+                "exec": [
+                  "// Parse la réponse JSON\r",
+                  "let jsonData = pm.response.json();\r",
+                  "\r",
+                  "// Vérifie si le token est présent dans la réponse\r",
+                  "if (jsonData.access_token || jsonData.access_token) {\r",
+                  "    // Sauvegarde le token dans l'environnement actif\r",
+                  "    pm.environment.set(\"authToken\", jsonData.token || jsonData.access_token);\r",
+                  "    console.log(\"✅ Token enregistré dans l'environnement :\", pm.environment.get(\"token\"));\r",
+                  "} else {\r",
+                  "    console.log(\"⚠️ Aucun token trouvé dans la réponse !\");\r",
+                  "}\r",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "1e4fe5e0-32ac-4d31-a43e-396070bca89f",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "47deadda-42ca-4247-820a-20400d266b72",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Authenticate a user and receive access tokens.\n\n**Request Body:**\n- `email` (string, required): User's email address\n- `password` (string, required): User's password\n\n**Response:**\n- `message`: Success message\n- `user`: User profile object\n- `access_token`: JWT access token (use this for authenticated requests)\n- `refresh_token`: JWT refresh token\n- `expires_at`: Token expiration timestamp"
+          }
+        },
+        {
+          "name": "Logout",
+          "id": "74d6decc-44ce-41de-8a9c-50388cf8b357",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Logout the current user. With bearer tokens, the frontend should drop the token. This endpoint acknowledges the logout request.\n\n**Response:**\n- `message`: Confirmation message"
+          }
+        },
+        {
+          "name": "Get Profile",
+          "id": "ea674650-9a52-4678-ba3d-5f6c6536d46b",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "description": "Bearer token from login response"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/getProfile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "getProfile"
+              ]
+            },
+            "description": "Get the authenticated user's profile information.\n\n**Authentication:** Required (Bearer token)\n\n**Response:**\n- `user`: User profile object containing:\n  - `id`: User ID\n  - `name`: First name\n  - `last_name`: Last name\n  - `email`: Email address\n  - `role`: User role\n  - `account_status`: Account status\n  - `household_id`: Associated household ID"
+          }
+        }
+      ],
+      "id": "714821e9-8b77-4843-9b1a-9474f55c8133",
+      "description": "Authentication endpoints for user registration, login, logout, and profile management. Uses Supabase for authentication with JWT bearer tokens."
+    },
+    {
+      "name": "Household",
+      "item": [
+        {
+          "name": "Get Household Members",
+          "id": "9c52a2cf-fc00-4d09-9eed-710c7a962e86",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "description": "Bearer token from login response"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/household/members",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "household",
+                "members"
+              ]
+            },
+            "description": "Get all members of the authenticated user's household.\n\n**Authentication:** Required (Bearer token)\n\n**Response:** Array of household members, each containing:\n- `user_id`: Member's user ID\n- `name`: Member's first name\n- `last_name`: Member's last name\n- `role`: Member's role in the household (e.g., \"Owner\")\n- `status`: Membership status (e.g., \"accepted\", \"pending\")\n- `numberOfMembers`: Total number of members in the household"
+          }
+        },
+        {
+          "name": "Get Household Address",
+          "id": "ced76e07-999e-4448-84ab-26448ba41b05",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "description": "Bearer token from login response"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/household/address",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "household",
+                "address"
+              ]
+            },
+            "description": "Get information about the authenticated user's household, including the address.\n\n**Authentication:** Required (Bearer token)\n\n**Response:** Array containing household information:\n- `id`: Household ID\n- `address`: Household address\n- `primary_user`: ID of the primary user\n- Other household-related fields"
+          }
+        }
+      ],
+      "id": "58f08b22-47ab-48d3-b5da-3ef565304010",
+      "description": "Household management endpoints for retrieving household members and address information."
+    },
+    {
+      "name": "Observations",
+      "item": [
+        {
+          "name": "Get Observations by Date",
+          "id": "8650c3ae-6223-4e3d-97e6-43a4bb7e9c66",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "description": "Bearer token from login response"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/observations/byDate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "observations",
+                "byDate"
+              ]
+            },
+            "description": "Get all parking observations ordered by creation date (most recent first).\n\n**Authentication:** Required (Bearer token)\n\n**Response:** Array of observation objects, each containing:\n- Observation details from the database\n- Ordered by `created_at` in descending order"
+          }
+        }
+      ],
+      "id": "1d5c3a2d-cc82-476e-b4b1-360034d141d1",
+      "description": "Endpoints for managing parking observations and signals."
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "id": "45d24af4-3a6e-42fd-aaf3-b497bac324ba",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "health"
+              ]
+            },
+            "description": "Check the health status of the API and its dependencies (Supabase database).\n\n**Authentication:** Not required\n\n**Response:**\n- `status`: Overall API status (\"ok\")\n- `timestamp`: Current timestamp (ISO format)\n- `uptime_ms`: Request processing time in milliseconds\n- `supabase`: Supabase connection status\n  - `status`: \"ok\", \"error\", \"exception\", or \"unknown\"\n  - `latency_ms`: Database query latency\n  - `error`: Error message if any\n- `env`: Environment configuration status\n  - `supabase_url_present`: Whether Supabase URL is configured\n  - `supabase_key_present`: Whether Supabase key is configured\n  - `supabase_key_type`: Type of key configured (\"service_role\" or \"anon\")"
+          }
+        }
+      ],
+      "id": "bfc1d314-e236-4ac9-bd4f-5092fe545602",
+      "description": "Health check endpoint to monitor API and database connectivity."
+    }
+  ],
+  "variable": [
+    {
+      "id": "04bab8e6-7169-4e4f-961d-4213eb5a9bc8",
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "id": "4941c3de-31be-4895-881b-0e98c4d7478d",
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "id": "d5f5c7ed-9cbb-4d68-80ad-e0dfae965919",
+      "key": "baseUrl",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}

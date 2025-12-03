@@ -1,40 +1,74 @@
+.households-card:nth-of-type(2) .household-item {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	align-items: center;
+	gap: 8px;
+}
+
+.households-card:nth-of-type(2) .settings-label {
+	color: #475569; /* slate-600 */
+	font-weight: 600;
+}
+
+.households-card:nth-of-type(2) .settings-value {
+	color: #0f172a; /* slate-900 */
+	font-weight: 700;
+	text-align: right;
+}
+
+/* Settings list top border for visual separation */
+.households-card:nth-of-type(2) .household-list {
+	border-top: 1px solid #eef2f7;
+}
+
+/* Subtle separation between label/value rows */
+.households-card:nth-of-type(2) .household-item + .household-item {
+	border-top: 1px solid #eef2f7;
+}
+
+/* Quit button: icon before text for visual polish */
+.household-quit-button::before {
+	content: "\1F6AA"; /* door emoji as a simple icon */
+	display: inline-block;
+	margin-right: 8px;
+}
 /* Invite member button (outline, rounded, blue) */
 .household-invite-member {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 2px;
-	padding: 10px 14px;
-	height: 40px;
+	gap: 8px;
+	padding: 12px 16px;
+	height: 44px;
 	border-radius: 12px;
-	border: 1.5px solid #3b82f6; /* blue-500 */
-	background: #6894f3;
-    background-color: rgba(104,148,243,0.12); /* slight transparent blue */
-    backdrop-filter: blur(2px); /* subtle blur on supported browsers */
-	color: #2563eb; /* blue-600 */
-	font-size: 0.95rem;
+	border: 1.5px solid #3b82f6; 
+	background-color: rgba(14, 67, 173, 0.08); 
+	-webkit-backdrop-filter: blur(6px) saturate(120%);
+	backdrop-filter: blur(6px) saturate(120%);
+	color: #2563eb;
+	font-size: 0.98rem;
 	font-weight: 600;
 	line-height: 1;
 	cursor: pointer;
 	text-decoration: none;
 	transition: background .18s ease, color .18s ease, box-shadow .18s ease, border-color .18s ease;
-	margin: 0; /* per screenshot */
+	margin: 0; 
 }
 .household-quit-button {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 2px;
-	padding: 10px 14px;
-	height: 40px;
+	gap: 10px;
+	padding: 12px 16px;
+	height: 44px;
 	border-radius: 12px;
 	border: 1.5px solid #f63b5a; /* red-500 */
-	background: #fbb6ce;
-    background-color: rgba(251,182,206,0.12); /* slight transparent red */
-    backdrop-filter: blur(2px); /* subtle blur on supported browsers */
+	background-color: rgba(251,182,206,0.12); /* slight transparent red */
+	-webkit-backdrop-filter: blur(6px) saturate(120%);
+	backdrop-filter: blur(6px) saturate(120%);
 	color: #b91c1c; /* red-700 */
-	font-size: 0.95rem;
-	font-weight: 600;
+	font-size: 0.98rem;
+	font-weight: 700;
 	line-height: 1;
 	cursor: pointer;
 	text-decoration: none;
@@ -45,8 +79,8 @@
 .household-invite-member::before {
 	content: "+";
 	display: inline-flex;
-	width: 20px;
-	height: 20px;
+	width: 22px;
+	height: 22px;
 	align-items: center;
 	justify-content: center;
 	border-radius: 50%;
@@ -75,19 +109,19 @@
 
 /* Optional: place button at top of card */
 .households-card .household-invite-row {
-	display: block; /* allow text-align centering */
-	width: 100%;
-	text-align: center;
-	margin: 0.8rem 0 0; /* small top spacing */
-	border-top: 1px solid #e2e8f0; /* separator above button */
-	padding-top: 0.8rem; /* spacing from separator */
+  display: block; /* allow text-align centering */
+  width: 100%;
+  text-align: center;
+  margin: 1rem 0 0; /* small top spacing */
+  border-top: 1px solid #e2e8f0; /* separator above button */
+  padding-top: 1rem; /* spacing from separator */
 }
 
 /* Ensure the button truly centers within the row */
 .households-card .household-invite-member {
-	display: inline-block; /* inline for text-align center */
-	margin-left: auto;
-	margin-right: auto;
+  display: inline-block; /* inline for text-align center */
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Hide accidental duplicate invite row placed outside the card */
@@ -97,102 +131,132 @@
 /* Container */
 .households-page {
 	min-height: calc(100dvh - 80px);
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	padding: 0 1.2rem 3rem;
-	background: #f5f7fa;
-	position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 1.2rem 3rem;
+  background: #f5f7fa;
+  position: relative;
 }
 
 .households-card {
 	width: 100%;
 	max-width: 540px;
-	background: #fff;
-	border: 1px solid #e2e8f0;
-	border-radius: 10px;
-	box-shadow: 0 10px 28px -6px rgba(0,0,0,0.12), 0 2px 10px -2px rgba(0,0,0,0.06);
-	padding: 1.2rem 1.6rem 1.2rem;
-	margin-top: 10px;
-	position: relative;
-	z-index: 1;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 8px 28px -6px rgba(0,0,0,0.12), 0 2px 10px -2px rgba(0,0,0,0.06);
+  padding: 1.4rem 1.6rem 1.2rem;
+  margin-top: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 /* Title */
 .households-name {
-	margin: 0 0 .6rem;
-	font-size: 1.6rem;
-	font-weight: 600;
+	margin: 0 0 .4rem;
+	font-size: 2rem;
+	font-weight: 800;
 	text-align: center;
-	letter-spacing: .4px;
-	color: #1a1f29;
+	letter-spacing: .2px;
+	color: #0f172a;
+}
+.households-members-title {
+	margin: .6rem 0 .2rem;
+	font-size: 1rem;
+	font-weight: 700;
+	color: #0f172a;
 }
 
 .households-subtitle {
-	text-align: center;
-	font-size: .95rem;
-	color: #5f6b7a;
-	margin-bottom: 1rem;
+  text-align: center;
+  font-size: .95rem;
+  color: #5f6b7a;
+  margin-bottom: 1rem;
 }
 
 /* Empty state */
 .households-empty {
-	text-align: center;
-	font-size: 0.95rem;
-	color: #5f6b7a;
-	padding: 0.75rem 0;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #5f6b7a;
+  padding: 0.75rem 0;
 }
 
 /* Members list */
 .household-list {
 	list-style: none;
-	padding: 0;
-	margin: 0.5rem 0 0;
-	border-top: 1px solid #e2e8f0;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  border-top: 1px solid #e2e8f0;
 }
 
 .household-item {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 10px;
-	padding: 14px 12px;
-	border-bottom: 1px solid #e2e8f0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 12px;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .household-item:last-child {
-	border-bottom: none;
+  border-bottom: none;
 }
 
 .household-item-name {
 	font-weight: 600;
 	color: #1a1f29;
+	display: flex;
+	align-items: center;
+	gap: 12px;
 }
+
+
 
 .household-item-meta {
 	font-size: 0.85rem;
-	color: #5f6b7a;
+	color: #1d2741;
+	padding: 6px 10px;
+	border-radius: 999px;
+	border: 1px solid #e2e8f0;
+	background: #f8fafc;
+	min-width: 110px;
+	text-align: center;
+}
+
+/* Badge tone variants based on role */
+.household-item-meta.is-owner {
+	color: #064e3b;
+	background: #ecfdf5;
+	border-color: #a7f3d0;
+}
+
+.household-item-meta.is-member {
+	color: #374151;
+	background: #f3f4f6;
+	border-color: #e5e7eb;
 }
 
 /* Feedback */
 .households-loading {
-	text-align: center;
-	font-size: 0.85rem;
-	color: #5f6b7a;
-	margin-top: 0.8rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #5f6b7a;
+  margin-top: 0.8rem;
 }
 
 .households-error {
-	text-align: center;
-	font-size: 0.85rem;
-	color: #dc2626;
-	margin-top: 0.8rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #dc2626;
+  margin-top: 0.8rem;
 }
 
 /* Responsive */
 @media (max-width: 480px) {
-	.households-card { padding: 1rem; }
-	.households-name { font-size: 1.4rem; }
+  .households-card { padding: 1rem; }
+  .households-name { font-size: 1.5rem; }
 }
 
 .invite-row {
@@ -208,4 +272,6 @@
   justify-content: center;
   padding: 1rem 0;
 }
+
+/* Removed duplicate settings block that was overriding new layout */
 

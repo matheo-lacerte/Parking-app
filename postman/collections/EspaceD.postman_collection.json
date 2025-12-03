@@ -1,0 +1,251 @@
+{
+  "info": {
+    "_postman_id": "b6aadf26-c73f-4030-8a94-029c5e6a06cd",
+    "name": "EspaceD",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "42475489"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "3612ac0d-c8ff-4dd8-b5a6-9de12eb0f1d6",
+                "exec": [
+                  "// Parse la réponse JSON\r",
+                  "let jsonData = pm.response.json();\r",
+                  "\r",
+                  "// Vérifie si le token est présent dans la réponse\r",
+                  "if (jsonData.access_token || jsonData.access_token) {\r",
+                  "    // Sauvegarde le token dans l'environnement actif\r",
+                  "    pm.environment.set(\"authToken\", jsonData.token || jsonData.access_token);\r",
+                  "    console.log(\"✅ Token enregistré dans l'environnement :\", pm.environment.get(\"token\"));\r",
+                  "} else {\r",
+                  "    console.log(\"⚠️ Aucun token trouvé dans la réponse !\");\r",
+                  "}\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "b3245273-d449-450e-8578-ac2c2bf7c683",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"mlacerte2013@gmail.com\",\r\n    \"password\": \"testPassword1234\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/auth/login",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "SignUp",
+          "id": "25fdaaf5-e8fb-421e-bf91-d0d7e55db958",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\" :\"Matheo\",\r\n    \"last_name\" : \"Lacerte\",\r\n    \"email\": \"mlacerte2013@gmail.com\",\r\n    \"password\": \"testPassword1234\",\r\n    \"address\": \"930 av.pierre-dansereau\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/auth/signup",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "auth",
+                "signup"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "a036676b-2c79-49e7-ab8d-9c2b33ace5fd"
+    },
+    {
+      "name": "Observations",
+      "item": [
+        {
+          "name": "getByDate",
+          "id": "fe51aa73-3737-4143-b526-9d77b22a3579",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"mlacerte2013@gmail.com\",\r\n    \"password\": \"testPassword1234\"\r\n}"
+            },
+            "url": {
+              "raw": "{{baseURL}}/observations/byDate",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "observations",
+                "byDate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "id": "a442ee88-7bb3-4a1a-809e-0639e5a31a4a",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        }
+      ],
+      "id": "249d8cd8-7c3f-4a36-8355-4307319720ba"
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "getUserDetails",
+          "id": "1e567ab9-e26d-4018-aa66-7ed49c98c2f1",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        }
+      ],
+      "id": "d237edac-a4c1-4cdc-9a59-1bc91ff91342"
+    },
+    {
+      "name": "household",
+      "item": [
+        {
+          "name": "getHouseholdMembers",
+          "id": "337c1c2a-694d-41df-a6b7-3a1d4367f4d9",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/api/household/members",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "household",
+                "members"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getHouseholdAddress",
+          "id": "d42a52cc-db57-4bcf-aecb-515384e41831",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        }
+      ],
+      "id": "e6db596d-5ab8-42eb-ac3d-6faa1205bb81"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "id": "1b69e919-2c5c-4800-95c2-bf9793eeab27",
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "id": "fd54e612-caf1-450b-9303-781dc696b506",
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "id": "49789d92-c1e0-49c8-86dc-7f521a1f3bcc",
+      "key": "baseURL",
+      "value": ""
+    }
+  ]
+}
