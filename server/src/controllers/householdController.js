@@ -402,6 +402,11 @@ export const acceptInvite = async (req, res) => {
       updateFields.user_id = userId
       updateFields.email = pendingMembership.email // keep or null; we keep for trace
     }
+    // On acceptance, convert role from 'invited' to 'member'
+    const currentRole = (pendingMembership.role || '').toLowerCase()
+    if (currentRole === 'invited' || currentRole === '') {
+      updateFields.role = 'member'
+    }
 
     const { error: updateErr } = await client
       .from('household_members')
