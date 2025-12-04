@@ -36,6 +36,31 @@ const Login = () => {
         }
         if (data.access_token) {
           login(data.access_token);
+
+          // Try automatic invite acceptance if a token is present
+          let inviteToken = null;
+          try {
+            const params = new URLSearchParams(window.location.search);
+            inviteToken = params.get('invite') || null;
+            if (!inviteToken) inviteToken = localStorage.getItem('inviteToken');
+          } catch {}
+
+          if (inviteToken) {
+            try {
+              const acceptRes = await apiFetch('/household/accept', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${data.access_token}`,
+                },
+                body: JSON.stringify({ invite: inviteToken })
+              });
+              // Do not block navigation on acceptance errors
+              await acceptRes.json().catch(() => ({}));
+            } catch {}
+            try { localStorage.removeItem('inviteToken'); } catch {}
+          }
+
           navigate(from, { replace: true });
         } else {
           throw new Error('Token manquant dans la réponse');

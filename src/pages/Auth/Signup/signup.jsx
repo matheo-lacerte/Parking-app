@@ -13,6 +13,9 @@ const Signup = () => {
 			const params = new URLSearchParams(window.location.search);
 			const token = params.get('invite');
 			setInvite(token || null);
+			if (token) {
+				try { localStorage.setItem('inviteToken', token); } catch {}
+			}
 		} catch {}
 	}, []);
 	const [form, setForm] = useState({
