@@ -1,9 +1,9 @@
 import { supabasePublic, supabaseAdmin } from "../utils/supabase.js"
 
 export const signup = async (req, res) => {
-    const { name, last_name, email, password, address } = req.body
+    const { name, last_name, email, password, address, invite } = req.body
 
-    if (!name || !last_name || !email || !password || !address)
+    if (!name || !last_name || !email || !password)
         return res.status(400).json({ error: "Champs manquants." })
 
     // 1. Signup auth
@@ -21,7 +21,8 @@ export const signup = async (req, res) => {
 
     // 2. Insérer user dans ta DB
     let household_id = null
-    let account_status = "pending"
+    // If an invite token is present, keep account pending until acceptance
+    let account_status = invite ? "pending" : "pending"
 
     const client = supabaseAdmin || supabasePublic
     const { error: userInsertError } = await client
@@ -37,51 +38,73 @@ export const signup = async (req, res) => {
 
     if (userInsertError) return res.status(500).json({ error: "Erreur DB lors du user insert." })
 
-    // 3. Vérifier si household existe déjà
-    const { data: existingHousehold } = await client
-        .from("households")
-        .select("*")
-        .eq("address", address)
-        .maybeSingle()
-
-    // 4. Si aucun foyer → en créer un (MAINTENANT tu peux mettre primary_user)
-    if (!existingHousehold) {
-        const { data: newHousehold, error: houseError } = await client
-            .from("households")
-            .insert({
-                address,
-                primary_user: user.id // maintenant ça marche
-            })
-            .select()
-            .single()
-
-        if (houseError) return res.status(500).json({ error: "Erreur création household", houseError })
-
-        household_id = newHousehold.id
-        account_status = "active"
-
-        // update user maintenant que household existe
-        await client
-            .from("users")
-            .update({ household_id, account_status })
-            .eq("id", user.id)
-
-        const { data: newHouseholdUser} = await client
-            .from("household_members")
-            .insert({
+    // 3. If invite token present, DO NOT create or join a household here
+    //    User will accept the invite later via /api/household/accept when authenticated.
+    //    Otherwise, proceed with address-based household creation if address provided.
+    if (!invite) {
+        if (!address) {
+            // No invite and no address → cannot create household, keep pending
+            // Return an explicit message to frontend
+            return res.status(200).json({
+                message: "Compte créé. Veuillez saisir une adresse pour créer votre foyer ou accepter une invitation.",
+                account_status,
                 household_id,
-                user_id: user.id,
-                role: "Owner",
-                status: "accepted"
+                user_id: user.id
             })
-            .select()
-            .single()
+        }
+
+        // 4. Vérifier si household existe déjà
+        const { data: existingHousehold } = await client
+            .from("households")
+            .select("*")
+            .eq("address", address)
+            .maybeSingle()
+
+        // 5. Si aucun foyer → en créer un
+        if (!existingHousehold) {
+            const { data: newHousehold, error: houseError } = await client
+                .from("households")
+                .insert({
+                    address,
+                    primary_user: user.id
+                })
+                .select()
+                .single()
+
+            if (houseError) return res.status(500).json({ error: "Erreur création household", houseError })
+
+            household_id = newHousehold.id
+            account_status = "active"
+
+            await client
+                .from("users")
+                .update({ household_id, account_status })
+                .eq("id", user.id)
+
+            await client
+                .from("household_members")
+                .insert({
+                    household_id,
+                    user_id: user.id,
+                    role: "Owner",
+                    status: "accepted"
+                })
+        } else {
+            // If address exists already, keep pending and wait for owner to invite
+            account_status = "pending"
+            await client
+                .from("users")
+                .update({ account_status })
+                .eq("id", user.id)
+        }
     }
 
     return res.status(200).json({
-        message: account_status === "active"
-            ? "Foyer créé, compte actif immédiat ✔"
-            : "Adresse déjà existante — compte en attente d'invitation",
+        message: invite
+            ? "Compte créé. Confirmez votre email puis acceptez l'invitation."
+            : account_status === "active"
+                ? "Foyer créé, compte actif immédiat ✔"
+                : "Adresse déjà existante — compte en attente d'invitation",
         account_status,
         household_id,
         user_id: user.id

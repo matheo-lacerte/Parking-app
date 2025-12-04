@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './signup.css';
 import { useLoading } from '../../../context/LoadingContext.jsx';
@@ -6,6 +6,15 @@ import { apiFetch } from '../../../lib/api.js';
 
 const Signup = () => {
 	const navigate = useNavigate();
+	// Read invite token from URL to adapt the form and payload
+	const [invite, setInvite] = useState(null);
+	useEffect(() => {
+		try {
+			const params = new URLSearchParams(window.location.search);
+			const token = params.get('invite');
+			setInvite(token || null);
+		} catch {}
+	}, []);
 	const [form, setForm] = useState({
 		name: '',
 		last_name: '',
@@ -28,10 +37,11 @@ const Signup = () => {
 		setLoading(true);
 		wrapPromise(async () => {
 			try {
+				const payload = invite ? { ...form, address: form.address || undefined, invite } : form;
 				const res = await apiFetch('/auth/signup', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(form)
+					body: JSON.stringify(payload)
 				});
 				const data = await res.json();
 				if (!res.ok) throw new Error(data.error || 'Erreur inscription');
@@ -70,10 +80,12 @@ const Signup = () => {
 						<label className="signup-label" htmlFor="password">Mot de passe</label>
 						<input id="password" type="password" name="password" className="signup-input" placeholder="Mot de passe" value={form.password} onChange={onChange} required />
 					</div>
-					<div className="signup-field">
-						<label className="signup-label" htmlFor="address">Adresse</label>
-						<input id="address" name="address" className="signup-input" placeholder="Adresse" value={form.address} onChange={onChange} required />
-					</div>
+					{!invite && (
+						<div className="signup-field">
+							<label className="signup-label" htmlFor="address">Adresse</label>
+							<input id="address" name="address" className="signup-input" placeholder="Adresse" value={form.address} onChange={onChange} required />
+						</div>
+					)}
 					<button type="submit" className="signup-submit" disabled={loading}>{loading ? 'En cours...' : 'Créer le compte'}</button>
 					{error && <div className="signup-error" role="alert">{error}</div>}
 					{message && <div className="signup-message" role="status">{message}</div>}
