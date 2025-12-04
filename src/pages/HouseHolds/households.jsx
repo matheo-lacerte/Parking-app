@@ -199,7 +199,7 @@ export default function Home() {
                       <span className="role-badge owner">Propriétaire</span>
                     )}
                     {m.role === 'member' && (
-                      <span className="role-text">Membre</span>
+                      <span className="role-badge member">Membre</span>
                     )}
                     {isPending && (
                       <span className="invite-badge">Invité (en attente)</span>
