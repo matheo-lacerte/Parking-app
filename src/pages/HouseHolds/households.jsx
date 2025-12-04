@@ -198,7 +198,7 @@ export default function Home() {
                     {isOwner && (
                       <span className="role-badge owner">Propriétaire</span>
                     )}
-                    {m.role === 'Member' && (
+                    {m.role === 'member' && (
                       <span className="role-text">Membre</span>
                     )}
                     {isPending && (

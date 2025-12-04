@@ -397,7 +397,7 @@ export const acceptInvite = async (req, res) => {
     }
 
     // If membership was created by email only, attach the authenticated user_id
-    const updateFields = { status: 'active' }
+    const updateFields = { status: 'accepted' }
     if (!pendingMembership.user_id) {
       updateFields.user_id = userId
       updateFields.email = pendingMembership.email // keep or null; we keep for trace
