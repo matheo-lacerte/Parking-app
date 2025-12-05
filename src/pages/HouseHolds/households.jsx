@@ -246,20 +246,6 @@ export default function Home() {
                           className="kick-button"
                           title="Retirer du foyer"
                           onClick={() => removeMember(m)}
-                          style={{
-                            marginLeft: 8,
-                            width: 28,
-                            height: 28,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            borderRadius: 6,
-                            border: '1px solid #b00020',
-                            background: '#d32f2f',
-                            color: '#fff',
-                            cursor: 'pointer',
-                            fontWeight: 700,
-                          }}
                         >
                           ✕
                         </button>

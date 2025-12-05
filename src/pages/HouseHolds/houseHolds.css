@@ -1,21 +1,23 @@
+
+/* Kick button styled like badges (pill) */
 .kick-button {
-	margin-left: 8px;
-	width: 28px;
-	height: 28px;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: 6px;
-	border: 1px solid #b00020;
-	background: #d32f2f;
-	color: #fff;
+	width: 28px;
+	height: 28px;
+	margin-left: 8px;
+	border-radius: 999px;
+	border: 1px solid #fecaca; /* red-200 border similar to cancel badge */
+	background: #fee2e2;       /* red-100 */
+	color: #7f1d1d;            /* red-900 */
 	cursor: pointer;
 	font-weight: 700;
 	line-height: 1;
 }
 
 .kick-button:hover {
-	background: #b00020;
+	background: #ffc9c9;
 }
 
 .household-actions {
