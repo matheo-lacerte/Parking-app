@@ -453,22 +453,20 @@ export const inviteMember = async (req, res) => {
 
 export const acceptInvite = async (req, res) => {
   try {
-    const client = getClient()
+    const client = supabaseAdmin || supabasePublic
 
-    const authUser = req.userProfile
-    const authUserId = authUser?.id
+    const authUser = req.userProfile || null
+    const authUserId = authUser?.id || null
 
-    const householdIdParam = Number(
-      req.body?.householdId || req.query?.householdId
-    )
-    const emailParam = (req.body?.email || req.query?.email || "").trim()
     const inviteToken = (req.body?.invite || req.query?.invite || "").trim()
+    const householdIdParam = Number(req.body?.householdId || req.query?.householdId)
+    const emailParam = (req.body?.email || req.query?.email || "").trim()
 
-    let householdId = householdIdParam || null
+    let householdId = Number.isNaN(householdIdParam) ? null : householdIdParam
     let email = emailParam || ""
     let tokenUserId = null
 
-    // Si token signé présent, on le vérifie
+    // 1) Si on a un token signé, on le vérifie
     if (inviteToken) {
       try {
         const [dataB64, sigB64] = inviteToken.split(".")
@@ -476,9 +474,9 @@ export const acceptInvite = async (req, res) => {
 
         const secret = String(
           process.env.APP_INVITE_SECRET ||
-          process.env.APP_SECRET ||
-          process.env.JWT_SECRET ||
-          "fallback-secret"
+            process.env.APP_SECRET ||
+            process.env.JWT_SECRET ||
+            "fallback-secret"
         )
 
         const expectedSig = crypto
@@ -498,107 +496,83 @@ export const acceptInvite = async (req, res) => {
         if (payload.householdId) {
           householdId = Number(payload.householdId)
         }
-
         if (payload.userId) {
           tokenUserId = String(payload.userId)
-          email = "" // si userId fourni, on ne se base pas sur l'email
+          email = "" // si on a un userId, on ne se base plus sur l'email
         } else if (payload.email) {
           email = String(payload.email)
         }
       } catch (e) {
         console.warn("acceptInvite token verify warn:", e?.message || e)
-        // on retombe sur les params bruts si dispo
+        // on retombe sur les params explicites si c'est cassé
       }
     }
 
-    // user effectif (soit authentifié, soit fourni par token)
-    const effectiveUserId = authUserId || tokenUserId
+    if (!householdId) {
+      return res.status(400).json({ error: "householdId manquant." })
+    }
 
-    if (!effectiveUserId) {
+    // 2) user effectif : user connecté OU userId venant du token
+    const effectiveUserId = authUserId || tokenUserId || null
+
+    if (!effectiveUserId && !email) {
       return res.status(401).json({
-        error: "Non authentifié et aucun identifiant utilisateur dans le jeton.",
+        error:
+          "Non authentifié et aucun identifiant (userId ou email) dans la requête.",
       })
     }
 
-    // Si on n’a toujours pas de foyer, on essaie de le déduire via une invitation pending
-    if (!householdId) {
-      // 1) invite pending attachée à un email
-      if (email) {
-        const { data: membershipByEmailOnly } = await client
-          .from("household_members")
-          .select("*")
-          .eq("status", "pending")
-          .ilike("email", email)
-          .maybeSingle()
+    // 3) On cherche la membership PENDING par user_id
+    let pendingMembership = null
 
-        if (membershipByEmailOnly?.household_id) {
-          householdId = Number(membershipByEmailOnly.household_id)
-        }
-      }
+    if (effectiveUserId) {
+      const { data: membershipByUser, error: membershipByUserErr } = await client
+        .from("household_members")
+        .select("*")
+        .eq("household_id", householdId)
+        .eq("user_id", effectiveUserId)
+        .eq("status", "pending")
+        .maybeSingle()
 
-      // 2) invite pending attachée à un user_id
-      if (!householdId) {
-        const { data: membershipByUserOnly } = await client
-          .from("household_members")
-          .select("*")
-          .eq("status", "pending")
-          .eq("user_id", effectiveUserId)
-          .maybeSingle()
-
-        if (membershipByUserOnly?.household_id) {
-          householdId = Number(membershipByUserOnly.household_id)
-        }
-      }
-
-      if (!householdId) {
-        return res.status(400).json({ error: "householdId manquant." })
+      if (membershipByUserErr) {
+        console.error("acceptInvite membershipByUserErr:", membershipByUserErr)
+      } else if (membershipByUser) {
+        pendingMembership = membershipByUser
       }
     }
 
-    // Chercher une membership pending pour cet user OU cet email
-    const { data: membershipByUser } = await client
-      .from("household_members")
-      .select("*")
-      .eq("household_id", householdId)
-      .eq("user_id", effectiveUserId)
-      .maybeSingle()
-
-    let pendingMembership = membershipByUser || null
-
+    // 4) Sinon, on tente par email (cas compte créé après invite)
     if (!pendingMembership && email) {
-      const { data: membershipByEmail } = await client
+      const { data: membershipByEmail, error: membershipByEmailErr } = await client
         .from("household_members")
         .select("*")
         .eq("household_id", householdId)
         .ilike("email", email)
+        .eq("status", "pending")
         .maybeSingle()
 
-      pendingMembership = membershipByEmail || null
+      if (membershipByEmailErr) {
+        console.error("acceptInvite membershipByEmailErr:", membershipByEmailErr)
+      } else if (membershipByEmail) {
+        pendingMembership = membershipByEmail
+      }
     }
 
     if (!pendingMembership) {
-      return res.status(404).json({ error: "Invitation introuvable." })
+      return res.status(404).json({ error: "Invitation introuvable ou déjà utilisée." })
     }
 
-    if (pendingMembership.status !== "pending") {
-      return res
-        .status(400)
-        .json({ error: "Cette invitation n'est pas en attente." })
+    // 5) Mise à jour de la membership → accepted / member
+    const updateFields = {
+      status: "accepted",
+      email: null,
     }
 
-    // Mettre à jour la membership
-    const updateFields = { status: "accepted" }
-
-    // Si l'invite a été créée seulement avec email, on bind le user_id
-    if (!pendingMembership.user_id) {
+    // Cas email-only -> on attache le user_id
+    if (!pendingMembership.user_id && effectiveUserId) {
       updateFields.user_id = effectiveUserId
-      updateFields.email = null
-    } else {
-      // si user_id déjà là, on nettoie l'email
-      updateFields.email = null
     }
 
-    // Rôle : invited -> member
     const currentRole = (pendingMembership.role || "").toLowerCase()
     if (currentRole === "invited" || currentRole === "") {
       updateFields.role = "member"
@@ -616,15 +590,17 @@ export const acceptInvite = async (req, res) => {
         .json({ error: "Erreur lors de l'activation de l'invitation." })
     }
 
-    // Mettre à jour le profil user
-    const { error: userUpdateErr } = await client
-      .from("users")
-      .update({ household_id: householdId, account_status: "active" })
-      .eq("id", effectiveUserId)
+    // 6) Mise à jour du profil user → rattache le household
+    if (effectiveUserId) {
+      const { error: userUpdateErr } = await client
+        .from("users")
+        .update({ household_id: householdId, account_status: "active" })
+        .eq("id", effectiveUserId)
 
-    if (userUpdateErr) {
-      console.error("acceptInvite userUpdateErr:", userUpdateErr)
-      // on ne bloque pas la réponse pour ça
+      if (userUpdateErr) {
+        console.error("acceptInvite userUpdateErr:", userUpdateErr)
+        // on ne bloque pas la réponse juste pour ça
+      }
     }
 
     return res
