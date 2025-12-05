@@ -265,12 +265,12 @@
 }
 
 .household-item {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 12px;
-  border-bottom: 1px solid #e2e8f0;
+	display: grid;
+	grid-template-columns: 1fr;
+	align-items: start;
+	gap: 6px;
+	padding: 14px 12px;
+	border-bottom: 1px solid #e2e8f0;
 }
 
 .household-item:last-child {

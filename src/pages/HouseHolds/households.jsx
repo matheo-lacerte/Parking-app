@@ -231,27 +231,27 @@ export default function Home() {
                     {isPending && (
                       <span className="invite-badge">Invité (en attente)</span>
                     )}
+                    {currentIsOwner && m.user_id !== currentUserId && (
+                      <div className="household-actions">
+                        {isPending ? (
+                          <button
+                            className="household-cancel-invite badge-button"
+                            onClick={() => removeMember(m)}
+                          >
+                            Annuler l'invitation
+                          </button>
+                        ) : (
+                          <button
+                            className="kick-button"
+                            title="Retirer du foyer"
+                            onClick={() => removeMember(m)}
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  {currentIsOwner && m.user_id !== currentUserId && (
-                    <div className="household-actions">
-                      {isPending ? (
-                        <button
-                          className="household-cancel-invite badge-button"
-                          onClick={() => removeMember(m)}
-                        >
-                          Annuler l'invitation
-                        </button>
-                      ) : (
-                        <button
-                          className="kick-button"
-                          title="Retirer du foyer"
-                          onClick={() => removeMember(m)}
-                        >
-                          ✕
-                        </button>
-                      )}
-                    </div>
-                  )}
                 </li>
               )
             })}
