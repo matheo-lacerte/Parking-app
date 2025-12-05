@@ -384,6 +384,7 @@ export const acceptInvite = async (req, res) => {
     }
     // If householdId missing (e.g., token verify failed), try resolving by email-only pending invite
     if (!householdId) {
+      // Fallback 1: pending invite created by email only
       if (email) {
         const { data: membershipByEmailOnly } = await client
           .from('household_members')
@@ -391,9 +392,22 @@ export const acceptInvite = async (req, res) => {
           .eq('status', 'pending')
           .ilike('email', email)
           .maybeSingle()
-
         if (membershipByEmailOnly && membershipByEmailOnly.household_id) {
           householdId = Number(membershipByEmailOnly.household_id)
+        }
+      }
+      // Fallback 2: pending invite already attached to authenticated user
+      if (!householdId && userId) {
+        const { data: membershipByUserOnly } = await client
+          .from('household_members')
+          .select('*')
+          .eq('status', 'pending')
+          .eq('user_id', userId)
+          .maybeSingle()
+        if (membershipByUserOnly && membershipByUserOnly.household_id) {
+          householdId = Number(membershipByUserOnly.household_id)
+          // If invite row has an email, keep it
+          email = membershipByUserOnly.email || email
         }
       }
       if (!householdId) {

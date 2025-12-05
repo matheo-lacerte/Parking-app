@@ -119,6 +119,8 @@ export default function Home() {
             // Clean query params and refresh members/address
             const cleanUrl = `${url.pathname}`;
             window.history.replaceState({}, '', cleanUrl);
+            // After successful acceptance, navigate home for clearer UX
+            try { window.location.assign('/'); } catch {}
             const mRes = await apiFetch('/household/members', {
               headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
             });
@@ -246,15 +248,20 @@ export default function Home() {
                           onClick={() => removeMember(m)}
                           style={{
                             marginLeft: 8,
-                            padding: '6px 10px',
+                            width: 28,
+                            height: 28,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                             borderRadius: 6,
                             border: '1px solid #b00020',
                             background: '#d32f2f',
                             color: '#fff',
                             cursor: 'pointer',
+                            fontWeight: 700,
                           }}
                         >
-                          Retirer
+                          ✕
                         </button>
                       )}
                     </div>
