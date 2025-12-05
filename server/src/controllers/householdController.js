@@ -220,6 +220,17 @@ export const inviteMember = async (req, res) => {
     const acceptInviteUrl = `${baseUrl}/households?accept=1&invite=${encodeURIComponent(inviteToken)}`
     const signupThenJoinUrl = `${baseUrl}/auth/signup?invite=${encodeURIComponent(inviteToken)}`
 
+    // Fetch household address for email context
+    let householdAddress = null
+    try {
+      const { data: hh } = await client
+        .from('households')
+        .select('address')
+        .eq('id', householdId)
+        .maybeSingle()
+      householdAddress = hh?.address || null
+    } catch {}
+
     const inviterName = [inviter?.name, inviter?.last_name].filter(Boolean).join(" ") || "Un membre"
     const subjectExisting = `Invitation à rejoindre un foyer`
     const subjectNew = `Créez votre compte et rejoignez un foyer`
@@ -243,6 +254,7 @@ export const inviteMember = async (req, res) => {
         <p style="font-size:16px; margin-bottom:15px;">
           ${inviterName} vous a invité à rejoindre son foyer sur EspaceD.
         </p>
+        ${householdAddress ? `<p style="font-size:15px; margin-bottom:12px; color:#444;">Adresse du foyer: <strong>${householdAddress}</strong></p>` : ''}
         <p style="font-size:16px; margin-bottom:20px;">
           Cliquez sur le bouton ci-dessous pour accepter l'invitation :
         </p>
@@ -267,6 +279,7 @@ export const inviteMember = async (req, res) => {
           ${inviterName} vous a invité à rejoindre son foyer sur EspaceD.
           Vous n'avez pas encore de compte.
         </p>
+        ${householdAddress ? `<p style="font-size:15px; margin-bottom:12px; color:#444;">Adresse du foyer: <strong>${householdAddress}</strong></p>` : ''}
         <p style="font-size:16px; margin-bottom:20px;">
           Créez d'abord votre compte, puis vous pourrez rejoindre le foyer immédiatement :
         </p>
@@ -369,8 +382,23 @@ export const acceptInvite = async (req, res) => {
     if (!userId) {
       return res.status(401).json({ error: 'Non authentifié.' })
     }
+    // If householdId missing (e.g., token verify failed), try resolving by email-only pending invite
     if (!householdId) {
-      return res.status(400).json({ error: 'householdId manquant.' })
+      if (email) {
+        const { data: membershipByEmailOnly } = await client
+          .from('household_members')
+          .select('*')
+          .eq('status', 'pending')
+          .ilike('email', email)
+          .maybeSingle()
+
+        if (membershipByEmailOnly && membershipByEmailOnly.household_id) {
+          householdId = Number(membershipByEmailOnly.household_id)
+        }
+      }
+      if (!householdId) {
+        return res.status(400).json({ error: 'householdId manquant.' })
+      }
     }
 
     // Find a pending membership for this user or their email
@@ -516,6 +544,142 @@ export const cancelInvite = async (req, res) => {
     return res.status(200).json({ message: 'Invitation annulée.' })
   } catch (err) {
     console.error('cancelInvite crash:', err)
+    return res.status(500).json({ error: 'Erreur serveur.' })
+  }
+}
+
+export const removeMember = async (req, res) => {
+  try {
+    const client = supabaseAdmin || supabasePublic
+    const requester = req.userProfile
+    const requesterHouseholdId = requester?.household_id
+    const { householdId, userId } = req.body || {}
+
+    // Only Owners can remove accepted members
+    if (!requesterHouseholdId) {
+      return res.status(400).json({ error: "householdId manquant pour l'utilisateur." })
+    }
+
+    // Verify requester is Owner of this household
+    const { data: requesterMembership } = await client
+      .from('household_members')
+      .select('role, status')
+      .eq('household_id', requesterHouseholdId)
+      .eq('user_id', requester?.id)
+      .maybeSingle()
+
+    if (!requesterMembership || requesterMembership.role !== 'Owner') {
+      return res.status(403).json({ error: "Seul le propriétaire peut retirer des membres." })
+    }
+
+    const targetHouseholdId = Number(householdId || requesterHouseholdId)
+    if (!targetHouseholdId) {
+      return res.status(400).json({ error: 'householdId manquant.' })
+    }
+    if (!userId) {
+      return res.status(400).json({ error: 'Paramètre userId manquant.' })
+    }
+
+    // Ensure target is a member of the same household and not pending
+    const { data: targetMembership } = await client
+      .from('household_members')
+      .select('*')
+      .eq('household_id', targetHouseholdId)
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (!targetMembership) {
+      return res.status(404).json({ error: 'Membre introuvable dans ce foyer.' })
+    }
+    if (targetMembership.status !== 'accepted') {
+      return res.status(400).json({ error: "Utilisez l'annulation pour une invitation en attente." })
+    }
+    if (targetMembership.role === 'Owner') {
+      return res.status(400).json({ error: "Impossible de retirer le propriétaire via cette action." })
+    }
+
+    // Remove membership row
+    const { error: delErr } = await client
+      .from('household_members')
+      .delete()
+      .eq('household_id', targetHouseholdId)
+      .eq('user_id', userId)
+
+    if (delErr) {
+      console.error('removeMember delErr:', delErr)
+      return res.status(500).json({ error: 'Erreur lors de la suppression du membre.' })
+    }
+
+    // Detach user from household
+    const { error: userUpdateErr } = await client
+      .from('users')
+      .update({ household_id: null, account_status: 'pending' })
+      .eq('id', userId)
+
+    if (userUpdateErr) {
+      console.error('removeMember userUpdateErr:', userUpdateErr)
+      // still return success; membership removed
+    }
+
+    // Send notification email to the removed user
+    try {
+      const {
+        SMTP_HOST,
+        SMTP_PORT,
+        SMTP_USER,
+        SMTP_PASS,
+        SMTP_FROM,
+        APP_BASE_URL,
+      } = process.env
+
+      if (SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS && SMTP_FROM) {
+        const nodemailer = (await import('nodemailer')).default
+        const transporter = nodemailer.createTransport({
+          host: SMTP_HOST,
+          port: Number(SMTP_PORT),
+          secure: Number(SMTP_PORT) === 465,
+          auth: { user: SMTP_USER, pass: SMTP_PASS },
+        })
+
+        // Fetch user email and household address
+        const [{ data: userRow }, { data: hhRow }] = await Promise.all([
+          client.from('users').select('email,name,last_name').eq('id', userId).maybeSingle(),
+          client.from('households').select('address').eq('id', targetHouseholdId).maybeSingle(),
+        ])
+        const targetEmail = userRow?.email
+        const targetName = [userRow?.name, userRow?.last_name].filter(Boolean).join(' ')
+        const hhAddress = hhRow?.address || ''
+
+        if (targetEmail) {
+          const subject = 'Notification — retrait du foyer'
+          const html = `
+            <div style="font-family:Arial,sans-serif;color:#222">
+              <h2 style="font-size:20px; font-weight:600; margin-bottom:10px;">EspaceD — Retrait du foyer</h2>
+              <p style="font-size:16px; margin-bottom:15px;">Bonjour ${targetName || ''},</p>
+              <p style="font-size:16px; margin-bottom:10px;">
+                Vous avez été retiré du foyer sur EspaceD.
+              </p>
+              ${hhAddress ? `<p style="font-size:15px; margin-bottom:12px; color:#444;">Adresse du foyer: <strong>${hhAddress}</strong></p>` : ''}
+              <p style="font-size:14px; color:#666; margin-top:20px;">
+                Si vous pensez qu'il s'agit d'une erreur, contactez le propriétaire du foyer.
+              </p>
+              <hr style="margin:30px 0; opacity:0.25;" />
+              <p style="font-size:12px; color:#999; text-align:center;">
+                ⚠ Ceci est un courriel automatique — merci de ne pas répondre à ce message.
+              </p>
+            </div>
+          `
+
+          await transporter.sendMail({ from: `EspaceD <${SMTP_FROM}>`, to: targetEmail, subject, html })
+        }
+      }
+    } catch (e) {
+      console.warn('removeMember mail warn:', e)
+    }
+
+    return res.status(200).json({ message: 'Membre retiré du foyer.' })
+  } catch (err) {
+    console.error('removeMember crash:', err)
     return res.status(500).json({ error: 'Erreur serveur.' })
   }
 }

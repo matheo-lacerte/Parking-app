@@ -73,6 +73,31 @@ export default function Home() {
     });
   };
 
+  const removeMember = async (member) => {
+    try {
+      const endpoint = member.status === 'pending' ? '/household/cancel' : '/household/remove';
+      const res = await apiFetch(endpoint, {
+        method: member.status === 'pending' ? 'POST' : 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ householdId: address?.id, userId: member.user_id, email: member.email }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Échec de la suppression du membre');
+      }
+      const mRes = await apiFetch('/household/members', {
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      });
+      const mData = mRes.ok ? await mRes.json() : [];
+      setMembers(Array.isArray(mData) ? mData : []);
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+
   useEffect(() => {
     if (!token) return;
     // Accept invite from email link: ?accept=1&householdId=...&email=...
@@ -205,33 +230,34 @@ export default function Home() {
                       <span className="invite-badge">Invité (en attente)</span>
                     )}
                   </div>
-                  {isPending && currentIsOwner && (
-                    <button
-                      className="household-cancel-invite badge-button"
-                      onClick={async () => {
-                        try {
-                          const res = await apiFetch('/household/cancel', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                            body: JSON.stringify({ householdId: address?.id, email: m.email || undefined, userId: m.user_id || undefined }),
-                          })
-                          if (!res.ok) {
-                            const data = await res.json().catch(() => ({}))
-                            alert(data.error || "Échec de l'annulation")
-                            return
-                          }
-                          const mRes = await apiFetch('/household/members', {
-                            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                          })
-                          const mData = mRes.ok ? await mRes.json() : []
-                          setMembers(Array.isArray(mData) ? mData : [])
-                        } catch (e) {
-                          alert(e.message)
-                        }
-                      }}
-                    >
-                      Annuler l'invitation
-                    </button>
+                  {currentIsOwner && m.user_id !== currentUserId && (
+                    <div className="household-actions">
+                      {isPending ? (
+                        <button
+                          className="household-cancel-invite badge-button"
+                          onClick={() => removeMember(m)}
+                        >
+                          Annuler l'invitation
+                        </button>
+                      ) : (
+                        <button
+                          className="kick-button"
+                          title="Retirer du foyer"
+                          onClick={() => removeMember(m)}
+                          style={{
+                            marginLeft: 8,
+                            padding: '6px 10px',
+                            borderRadius: 6,
+                            border: '1px solid #b00020',
+                            background: '#d32f2f',
+                            color: '#fff',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Retirer
+                        </button>
+                      )}
+                    </div>
                   )}
                 </li>
               )

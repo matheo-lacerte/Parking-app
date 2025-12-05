@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { apiFetch } from "../../lib/api.js";
 import "./Navbar.css";
@@ -7,6 +7,7 @@ import "./Navbar.css";
 export default function Navbar() {
   const { isAuthenticated, token, logout } = useAuth();
   const [hasHousehold, setHasHousehold] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
     let cancelled = false;
@@ -37,7 +38,7 @@ export default function Navbar() {
     };
     run();
     return () => { cancelled = true; };
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated, token, location.pathname]);
 
   const handleLogout = () => {
     logout();
